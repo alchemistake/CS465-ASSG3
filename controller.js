@@ -36,8 +36,6 @@ c.addEventListener("mousedown", function (event) {
 // Removes camera movement listeners when mouse is up
 function finish() {
     c.removeEventListener("mousemove", camera);
-    if (!playing)
-        requestAnimFrame(render);
 }
 
 c.addEventListener("mouseup", finish);
