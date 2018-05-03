@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <img src="Textures/fur.png" id="fur" hidden/>
+    <meta charset="UTF-8">
+    <title>CS465 ASSG3</title>
+    <link rel="stylesheet" href="reset.css">
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    attribute vec2 vTexPosition;
+    varying vec2 fTexPosition;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    void main()
+    {
+        gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        fTexPosition = vTexPosition;
+    }
+
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec2 fTexPosition;
+    uniform sampler2D sampler;
+
+    void main(){
+        gl_FragColor = texture2D(sampler, fTexPosition);
+    }
+
+    </script>
+
+    <script type="text/javascript" src="Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="Common/initShaders.js"></script>
+    <script type="text/javascript" src="Common/MV.js"></script>
+    <script type="text/javascript" src="view.js"></script>
+    <script type="text/javascript" src="cat.js"></script>
+</head>
+<body>
+<canvas id="gl-canvas" width="512" height="512">
+    Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+</body>
+<script src="controller.js"></script>
+</html>
