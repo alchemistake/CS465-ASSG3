@@ -1,5 +1,10 @@
-// Camera movement angles on their axis
+// Camera
 let cameraX = 0.0, cameraY = 0.0;
+let cameraDistance = 25.0;
+let cameraMinDistance = 5.0;
+let cameraMaxDistance = 45.0;
+let cameraPosition = vec4(cameraDistance);
+let upPosition = add(cameraPosition, vec4(0., 1.));
 
 let canvas;
 let gl;
@@ -7,8 +12,6 @@ let program;
 
 let projectionMatrix;
 let modelViewMatrix;
-
-let instanceMatrix;
 let modelViewMatrixLoc;
 
 // Textures are hold here to have access from multiple scripts
@@ -16,8 +19,8 @@ let textures = {
     "bg": null,
 };
 
-let vertices = [
-    // Vertices of cube
+// Cube constants
+const cubeVertexPos = [
     // Front face
     -50., -50., 50.,
     50., -50., 50.,
@@ -49,9 +52,7 @@ let vertices = [
     -50., 50., 50.,
     -50., 50., -50.,
 ];
-
-let textureCoords = [
-    // Coordinates of cube
+const cubeTextPos = [
     // Front face
     -4.5, -4.5,
     5.5, -4.5,
@@ -83,9 +84,7 @@ let textureCoords = [
     5.5, 5.5,
     -4.5, 5.5,
 ];
-
-let vertexIndices = [
-    // Indices of cuve
+const cubeIndex = [
     0, 1, 2, 0, 2, 3,    // Front face
     4, 5, 6, 4, 6, 7,    // Back face
     8, 9, 10, 8, 10, 11,  // Top face
@@ -94,15 +93,9 @@ let vertexIndices = [
     20, 21, 22, 20, 22, 23  // Left face
 ];
 
-let vertexPositionBuffer;
-let vertexTextureCoordBuffer;
-let vertexIndexBuffer;
+// Objects
+let cube;
 
-let cameraDistance = 25.0;
-let cameraMinDistance = 5.0;
-let cameraMaxDistance = 35.0;
-let cameraPosition = vec4(cameraDistance, 0., 0., 0.);
-let upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -114,7 +107,6 @@ window.onload = function init() {
 
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.clearColor(.5, .5, .5, 1.0);
-    // Depth test was not enable in the original
     gl.enable(gl.DEPTH_TEST);
 
     program = initShaders(gl, "vertex-shader", "fragment-shader");
@@ -132,38 +124,18 @@ window.onload = function init() {
     program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
     gl.enableVertexAttribArray(program.textureCoordAttribute);
 
-    instanceMatrix = mat4();
-
     // Projection is changed to perspective for more realistic look
-    projectionMatrix = perspective(45., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 150.);
+    projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 150.);
 
-    modelViewMatrix = lookAt(vec3(cameraPosition), vec3(0, 0, 0), vec3(subtract(upPosition, cameraPosition)));
+    modelViewMatrix = lookAt(vec3(cameraPosition), vec3(), vec3(subtract(upPosition, cameraPosition)));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    vertexPositionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    vertexPositionBuffer.itemSize = 3;
-    vertexPositionBuffer.numItems = vertices.length / vertexPositionBuffer.itemSize;
-
-    vertexTextureCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureCoordBuffer);
-
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-    vertexTextureCoordBuffer.itemSize = 2;
-    vertexTextureCoordBuffer.numItems = textureCoords.length / vertexTextureCoordBuffer.itemSize;
-
-    vertexIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices), gl.STATIC_DRAW);
-    vertexIndexBuffer.itemSize = 1;
-    vertexIndexBuffer.numItems = vertexIndices.length / vertexIndexBuffer.itemSize;
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex);
+    initializeObject(cube);
 
     render();
 };
@@ -178,14 +150,7 @@ function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.vertexAttribPointer(program.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureCoordBuffer);
-    gl.vertexAttribPointer(program.textureCoordAttribute, vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
-    gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    renderObject(cube);
 }
 
 // Creates texture object
@@ -202,4 +167,44 @@ function changeTexture(name) {
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+}
+
+// Object system
+function generateObject(vPos, tPos, index) {
+    return {
+        "vPos": vPos,
+        "tPos": tPos,
+        "index": index,
+        "vBuf": gl.createBuffer(),
+        "tBuf": gl.createBuffer(),
+        "iBuf": gl.createBuffer()
+    }
+}
+
+function initializeObject(obj) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(obj["vPos"]), gl.STATIC_DRAW);
+    obj["vBuf"].itemSize = 3;
+    obj["vBuf"].numItems = obj["vPos"].length / obj["vBuf"].itemSize;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["tBuf"]);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(obj["tPos"]), gl.STATIC_DRAW);
+    obj["tBuf"].itemSize = 2;
+    obj["tBuf"].numItems = obj["tPos"].length / obj["tBuf"].itemSize;
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(obj["index"]), gl.STATIC_DRAW);
+    obj["iBuf"].itemSize = 1;
+    obj["iBuf"].numItems = obj["index"].length / obj["iBuf"].itemSize;
+}
+
+function renderObject(obj){
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
+    gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["tBuf"]);
+    gl.vertexAttribPointer(program.textureCoordAttribute, obj["tBuf"].itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
+    gl.drawElements(gl.TRIANGLES, obj["iBuf"].numItems, gl.UNSIGNED_SHORT, 0);
 }

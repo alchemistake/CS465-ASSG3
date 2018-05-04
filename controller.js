@@ -38,17 +38,19 @@ function finish() {
     c.removeEventListener("mousemove", camera);
 }
 
-function zoom(){
+function zoom() {
     const speed = 2;
-    let e = window.event || e; // old IE support
-    let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
+    if (Date.now() - lastUpdate > mspf) {
+        let e = window.event || e; // old IE support
+        let delta = Math.max(-1, Math.min(1, (e.wheelDelta || -e.detail)));
 
-    cameraDistance += delta * speed;
-    cameraDistance = Math.min(Math.max(cameraDistance, cameraMinDistance), cameraMaxDistance);
-    cameraPosition = vec4(cameraDistance, 0., 0., 0.);
-    upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
+        cameraDistance += delta * speed;
+        cameraDistance = Math.min(Math.max(cameraDistance, cameraMinDistance), cameraMaxDistance);
+        cameraPosition = vec4(cameraDistance, 0., 0., 0.);
+        upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
-    requestAnimFrame(render);
+        requestAnimFrame(render);
+    }
 }
 
 c.addEventListener("mouseup", finish);
