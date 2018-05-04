@@ -1,12 +1,3 @@
-// This file was based on the man example of the book but heavily edited
-function scale4(a, b, c) {
-    const result = mat4();
-    result[0][0] = a;
-    result[1][1] = b;
-    result[2][2] = c;
-    return result;
-}
-
 // Camera movement angles on their axis
 let cameraX = 0.0, cameraY = 0.0;
 
@@ -25,70 +16,91 @@ let textures = {
     "bg": null,
 };
 
-// Vertices of cube
-const vertices = [
-    [-0.5, -0.5, 0.5],
-    [-0.5, 0.5, 0.5],
-    [0.5, 0.5, 0.5],
-    [0.5, -0.5, 0.5],
-    [-0.5, -0.5, -0.5],
-    [-0.5, 0.5, -0.5],
-    [0.5, 0.5, -0.5],
-    [0.5, -0.5, -0.5]
+let vertices = [
+    // Vertices of cube
+    // Front face
+    -50., -50., 50.,
+    50., -50., 50.,
+    50., 50., 50.,
+    -50., 50., 50.,
+    // Back face
+    -50., -50., -50.,
+    -50., 50., -50.,
+    50., 50., -50.,
+    50., -50., -50.,
+    // Top face
+    -50., 50., -50.,
+    -50., 50., 50.,
+    50., 50., 50.,
+    50., 50., -50.,
+    // Bottom face
+    -50., -50., -50.,
+    50., -50., -50.,
+    50., -50., 50.,
+    -50., -50., 50.,
+    // Right face
+    50., -50., -50.,
+    50., 50., -50.,
+    50., 50., 50.,
+    50., -50., 50.,
+    // Left face
+    -50., -50., -50.,
+    -50., -50., 50.,
+    -50., 50., 50.,
+    -50., 50., -50.,
 ];
 
-// Figure and Joint variables are converted to objects for ease of use
-// And there is added figure parts and joints
-const figure = {
-    "room": null,
-    "surface": null
-};
+let textureCoords = [
+    // Coordinates of cube
+    // Front face
+    -4.5, -4.5,
+    5.5, -4.5,
+    5.5, 5.5,
+    -4.5, 5.5,
+    // Back face
+    5.5, -4.5,
+    5.5, 5.5,
+    -4.5, 5.5,
+    -4.5, -4.5,
+    // Top face
+    -4.5, 5.5,
+    -4.5, -4.5,
+    5.5, -4.5,
+    5.5, 5.5,
+    // Bottom face
+    5.5, 5.5,
+    -4.5, 5.5,
+    -4.5, -4.5,
+    5.5, -4.5,
+    // Right face
+    5.5, -4.5,
+    5.5, 5.5,
+    -4.5, 5.5,
+    -4.5, -4.5,
+    // Left face
+    -4.5, -4.5,
+    5.5, -4.5,
+    5.5, 5.5,
+    -4.5, 5.5,
+];
 
-const stack = [];
-let vBuffer;
-const pointsArray = [];
+let vertexIndices = [
+    // Indices of cuve
+    0, 1, 2, 0, 2, 3,    // Front face
+    4, 5, 6, 4, 6, 7,    // Back face
+    8, 9, 10, 8, 10, 11,  // Top face
+    12, 13, 14, 12, 14, 15, // Bottom face
+    16, 17, 18, 16, 18, 19, // Right face
+    20, 21, 22, 20, 22, 23  // Left face
+];
 
-// Traverses the hierarchy tree
-function traverse(key) {
-    if (key == null) return;
-    stack.push(modelViewMatrix);
-    modelViewMatrix = mult(modelViewMatrix, figure[key].transform);
-    figure[key].render();
-    if (figure[key].child != null) traverse(figure[key].child);
-    modelViewMatrix = stack.pop();
-    if (figure[key].sibling != null) traverse(figure[key].sibling);
-}
-
-// A function creator for each part of figure to reduce the code clutter.
-function renderGenerator(height, width) {
-    return function () {
-        instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
-        instanceMatrix = mult(instanceMatrix, scale4(width, height, width));
-        gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
-        for (let i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
-    }
-}
-
-// Quad function is updated to accommodate for the texture locations
-function quad(a, b, c, d,) {
-    pointsArray.push([...vertices[a], 5.5, 5.5]);
-    pointsArray.push([...vertices[b], 5.5, -5.5]);
-    pointsArray.push([...vertices[c], -5.5, -5.5]);
-    pointsArray.push([...vertices[d], -5.5, 5.5]);
-}
-
-function cube() {
-    quad(1, 0, 3, 2);
-    quad(2, 3, 7, 6);
-    quad(3, 0, 4, 7);
-    quad(6, 5, 1, 2);
-    quad(4, 5, 6, 7);
-    quad(5, 4, 0, 1);
-}
+let vertexPositionBuffer;
+let vertexTextureCoordBuffer;
+let vertexIndexBuffer;
 
 let cameraDistance = 25.0;
-let cameraMinDistance = 10.0;
-let cameraMaxDistance = 30.0;
+let cameraMinDistance = 5.0;
+let cameraMaxDistance = 35.0;
 let cameraPosition = vec4(cameraDistance, 0., 0., 0.);
 let upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
@@ -109,13 +121,21 @@ window.onload = function init() {
 
     // Create the texture for later use
     generateTexture("bg");
+    gl.activeTexture(gl.TEXTURE0);
+    changeTexture("bg");
 
     gl.useProgram(program);
+
+    program.vertexPositionAttribute = gl.getAttribLocation(program, "vPosition");
+    gl.enableVertexAttribArray(program.vertexPositionAttribute);
+
+    program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
+    gl.enableVertexAttribArray(program.textureCoordAttribute);
 
     instanceMatrix = mat4();
 
     // Projection is changed to perspective for more realistic look
-    projectionMatrix = perspective(45., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 100.);
+    projectionMatrix = perspective(45., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 150.);
 
     modelViewMatrix = lookAt(vec3(cameraPosition), vec3(0, 0, 0), vec3(subtract(upPosition, cameraPosition)));
 
@@ -124,24 +144,26 @@ window.onload = function init() {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube();
+    vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
 
-    vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    vertexPositionBuffer.itemSize = 3;
+    vertexPositionBuffer.numItems = vertices.length / vertexPositionBuffer.itemSize;
 
-    const vPosition = gl.getAttribLocation(program, "vPosition");
-    const vTexPosition = gl.getAttribLocation(program, 'vTexPosition');
+    vertexTextureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureCoordBuffer);
 
-    // Code for enabling x,y,z, u and v coordinates
-    gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, gl.FALSE, 5 * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(vTexPosition, 2, gl.FLOAT, gl.FALSE, 5 * Float32Array.BYTES_PER_ELEMENT, 3 * Float32Array.BYTES_PER_ELEMENT);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
+    vertexTextureCoordBuffer.itemSize = 2;
+    vertexTextureCoordBuffer.numItems = textureCoords.length / vertexTextureCoordBuffer.itemSize;
 
-    gl.enableVertexAttribArray(vPosition);
-    gl.enableVertexAttribArray(vTexPosition);
+    vertexIndexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
 
-    gl.activeTexture(gl.TEXTURE0);
-    changeTexture("bg");
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(vertexIndices), gl.STATIC_DRAW);
+    vertexIndexBuffer.itemSize = 1;
+    vertexIndexBuffer.numItems = vertexIndices.length / vertexIndexBuffer.itemSize;
 
     render();
 };
@@ -154,12 +176,16 @@ function render() {
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
-    for (let key in figure) {
-        initNodes(key);
-    }
-
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    traverse("room");
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.vertexAttribPointer(program.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureCoordBuffer);
+    gl.vertexAttribPointer(program.textureCoordAttribute, vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vertexIndexBuffer);
+    gl.drawElements(gl.TRIANGLES, vertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
 }
 
 // Creates texture object
@@ -170,7 +196,7 @@ function generateTexture(textureName) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById(textureName));
 }
 
-// Wrapper for gl.bindtexture function to increase ease of use
+// Wrapper for gl.bindTexture function to increase ease of use
 function changeTexture(name) {
     gl.bindTexture(gl.TEXTURE_2D, textures[name]);
     gl.generateMipmap(gl.TEXTURE_2D);
