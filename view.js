@@ -94,7 +94,7 @@ const cubeIndex = [
 ];
 
 // Objects
-let cube, bezier;
+let cube, surface;
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -125,7 +125,7 @@ window.onload = function init() {
     gl.enableVertexAttribArray(program.textureCoordAttribute);
 
     // Projection is changed to perspective for more realistic look
-    projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 150.);
+    projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
 
     modelViewMatrix = lookAt(vec3(cameraPosition), vec3(), vec3(subtract(upPosition, cameraPosition)));
 
@@ -137,11 +137,12 @@ window.onload = function init() {
     cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex);
     initializeObject(cube);
 
+    generateControlPoints();
     generateCombinations();
     runGrid();
 
-    bezier = generateObject(bezierVertexPos, bezierTextPos, bezierIndex);
-    initializeObject(bezier);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    initializeObject(surface);
 
     render();
 };
@@ -156,10 +157,10 @@ function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    changeTexture("bg");
-    renderObject(cube);
     changeTexture("fg");
-    renderObject(bezier);
+    renderObject(cube);
+    changeTexture("bg");
+    renderObject(surface);
 }
 
 // Creates texture object
@@ -188,6 +189,16 @@ function generateObject(vPos, tPos, index) {
         "tBuf": gl.createBuffer(),
         "iBuf": gl.createBuffer()
     }
+}
+
+function updateObject(obj, vPos, tPos, index) {
+    if (vPos !== undefined)
+        obj["vPos"] = vPos;
+    if (tPos !== undefined)
+        obj["tPos"] = tPos;
+    if (index !== undefined)
+        obj["index"] = index;
+
 }
 
 function initializeObject(obj) {

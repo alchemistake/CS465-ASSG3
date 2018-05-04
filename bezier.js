@@ -2,15 +2,18 @@
 let noControlPoints = [4, 4];
 let combinations = {};
 let controlPoints = [];
-let noStep = [100, 100];
-let stepSize = [1. / noStep[0], 1. / noStep[1]];
+let noStep = 100;
+let stepSize = 1. / noStep;
 
-let bezierVertexPos, bezierTextPos, bezierIndex;
+let surfaceVertexPos, surfaceTextPos, surfaceIndex;
 
-for (let i = 0; i <= noControlPoints[0]; i++) {
-    controlPoints.push([]);
-    for (let j = 0; j <= noControlPoints[1]; j++)
-        controlPoints[i].push(vec3(i * 3 - 1.5, j * 3 - 1.5, Math.random() * 10 - 5.));
+function generateControlPoints() {
+    controlPoints = [];
+    for (let i = 0; i <= noControlPoints[0]; i++) {
+        controlPoints.push([]);
+        for (let j = 0; j <= noControlPoints[1]; j++)
+            controlPoints[i].push(vec3(i * 3 - 1.5 * noControlPoints[0], j * 3 - 1.5 * noControlPoints[1], Math.random() * 10 - 5.));
+    }
 }
 
 function generateCombinations() {
@@ -31,11 +34,11 @@ function generateCombinations() {
     }
 }
 
-function bez(k, n, u) {
+function bezier(k, n, u) {
     return Math.pow(u, k) * Math.pow((1 - u), (n - k)) * combinations[n.toString()][k]
 }
 
-function duBez(k, n, u) {
+function duBezier(k, n, u) {
     return (Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k)) * (k * (1 - u) - u * (n - k))) * combinations[n.toString()][k]
 }
 
@@ -45,7 +48,7 @@ function parametric(u, v) {
     for (let i = 0; i <= noControlPoints[0]; i++) {
         for (let j = 0; j <= noControlPoints[1]; j++) {
             for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * bez(i, noControlPoints[0], v) * bez(j, noControlPoints[1], u);
+                sum[k] += controlPoints[i][j][k] * bezier(i, noControlPoints[0], v) * bezier(j, noControlPoints[1], u);
         }
     }
 
@@ -58,7 +61,7 @@ function duParametric(u, v) {
     for (let i = 0; i <= noControlPoints[0]; i++) {
         for (let j = 0; j <= noControlPoints[1]; j++) {
             for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * bez(i, noControlPoints[0], v) * duBez(j, noControlPoints[1], u);
+                sum[k] += controlPoints[i][j][k] * bezier(i, noControlPoints[0], v) * duBezier(j, noControlPoints[1], u);
         }
     }
 
@@ -71,7 +74,7 @@ function dvParametric(u, v) {
     for (let i = 0; i <= noControlPoints[0]; i++) {
         for (let j = 0; j <= noControlPoints[1]; j++) {
             for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * duBez(i, noControlPoints[0], v) * bez(j, noControlPoints[1], u);
+                sum[k] += controlPoints[i][j][k] * duBezier(i, noControlPoints[0], v) * bezier(j, noControlPoints[1], u);
         }
     }
 
@@ -85,26 +88,26 @@ function normal(u, v) {
 }
 
 function runGrid() {
-    bezierVertexPos = [];
-    bezierTextPos = [];
-    bezierIndex = [];
+    surfaceVertexPos = [];
+    surfaceTextPos = [];
+    surfaceIndex = [];
 
-    for (let i = 0; i <= noStep[0]; i++) {
-        for (let j = 0; j <= noStep[1]; j++) {
-            let u = i * stepSize[0], v = j * stepSize[1];
-            bezierVertexPos.push(parametric(u, v));
-            bezierTextPos.push(vec2(u, v))
+    for (let i = 0; i <= noStep; i++) {
+        for (let j = 0; j <= noStep; j++) {
+            let u = i * stepSize, v = j * stepSize;
+            surfaceVertexPos.push(parametric(u, v));
+            surfaceTextPos.push(vec2(u, v))
         }
     }
 
-    for (let i = 0; i < noStep[0]; i++) {
-        for (let j = 0; j < noStep[1]; j++) {
-            bezierIndex.push(j * (noStep[0] + 1) + i);
-            bezierIndex.push(j * (noStep[0] + 1) + i + 1);
-            bezierIndex.push((j + 1) * (noStep[0] + 1) + i);
-            bezierIndex.push(j * (noStep[0] + 1) + i + 1);
-            bezierIndex.push((j + 1) * (noStep[0] + 1) + i + 1);
-            bezierIndex.push((j + 1) * (noStep[0] + 1) + i);
+    for (let i = 0; i < noStep; i++) {
+        for (let j = 0; j < noStep; j++) {
+            surfaceIndex.push(j * (noStep + 1) + i);
+            surfaceIndex.push(j * (noStep + 1) + i + 1);
+            surfaceIndex.push((j + 1) * (noStep + 1) + i);
+            surfaceIndex.push(j * (noStep + 1) + i + 1);
+            surfaceIndex.push((j + 1) * (noStep + 1) + i + 1);
+            surfaceIndex.push((j + 1) * (noStep + 1) + i);
         }
     }
 }

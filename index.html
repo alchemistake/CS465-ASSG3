@@ -19,6 +19,8 @@
         fTexPosition = vTexPosition;
     }
 
+
+
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -31,6 +33,8 @@
         gl_FragColor = texture2D(sampler, fTexPosition);
     }
 
+
+
     </script>
 
     <script type="text/javascript" src="Common/webgl-utils.js"></script>
@@ -40,10 +44,20 @@
     <script type="text/javascript" src="bezier.js"></script>
 
     <style>
-        html, body{
+        html, body {
             height: 100%;
             width: 100%;
             overflow: hidden;
+        }
+
+        #controller {
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        #controls {
+            background: white;
         }
     </style>
 </head>
@@ -55,4 +69,15 @@
 <img src="Textures/bg.png" id="bg" hidden/>
 <img src="Textures/fg.png" id="fg" hidden/>
 <script src="controller.js"></script>
+<div id="controller">
+    <button onclick="showOptions();">Show/Hide Controls</button>
+    <div id="controls" hidden>
+        Number of Control Points<br>
+        <input onchange="changeNoControlPoints();" id="noControlPointsX" type="number" value="4">
+        <input onchange="changeNoControlPoints();" id="noControlPointsY" type="number" value="4">
+        <br>
+        Step Number<br>
+        <input onchange="changeNoStep();" id="noStep" type="number" value="100">
+    </div>
+</div>
 </html>

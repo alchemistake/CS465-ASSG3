@@ -56,3 +56,40 @@ function zoom() {
 c.addEventListener("mouseup", finish);
 c.addEventListener("mouseleave", finish);
 c.addEventListener("mousewheel", zoom);
+
+function showOptions() {
+    document.getElementById("controls").hidden = !document.getElementById("controls").hidden;
+}
+
+function changeNoControlPoints() {
+    noControlPoints = [parseInt(document.getElementById("noControlPointsX").value), parseInt(document.getElementById("noControlPointsY").value)];
+
+    generateControlPoints();
+    generateCombinations();
+    runGrid();
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    initializeObject(surface);
+    requestAnimationFrame(render);
+}
+
+function changeNoStep() {
+    noStep = parseInt(document.getElementById("noStep").value);
+    stepSize = 1. / noStep;
+
+    runGrid();
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    initializeObject(surface);
+    requestAnimationFrame(render);
+}
+
+function pointOnCanvas(event) {
+    let x = event.x;
+    let y = event.y;
+
+    x -= canvas.offsetLeft;
+    y -= canvas.offsetTop;
+
+    x = -1 + 2 * x / canvas.width;
+    y = 1 + -2 * y / canvas.height;
+    return vec2(x, y);
+}
