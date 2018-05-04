@@ -7,6 +7,9 @@ function scale4(a, b, c) {
     return result;
 }
 
+// Camera movement angles on their axis
+let cameraX = 0.0, cameraY = 0.0;
+
 let canvas;
 let gl;
 let program;
@@ -19,7 +22,7 @@ let modelViewMatrixLoc;
 
 // Textures are hold here to have access from multiple scripts
 let textures = {
-    "fur": null,
+    "bg": null,
 };
 
 // Vertices of cube
@@ -59,7 +62,7 @@ function traverse(key) {
 // A function creator for each part of figure to reduce the code clutter.
 function renderGenerator(height, width) {
     return function () {
-        instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.5 * height, 0.0));
+        instanceMatrix = mult(modelViewMatrix, translate(0.0, 0.0, 0.0));
         instanceMatrix = mult(instanceMatrix, scale4(width, height, width));
         gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(instanceMatrix));
         for (let i = 0; i < 6; i++) gl.drawArrays(gl.TRIANGLE_FAN, 4 * i, 4);
@@ -68,10 +71,10 @@ function renderGenerator(height, width) {
 
 // Quad function is updated to accommodate for the texture locations
 function quad(a, b, c, d,) {
-    pointsArray.push([...vertices[a], 1.5, 1.5]);
-    pointsArray.push([...vertices[b], 1.5, -1.5]);
-    pointsArray.push([...vertices[c], -1.5, -1.5]);
-    pointsArray.push([...vertices[d], -1.5, 1.5]);
+    pointsArray.push([...vertices[a], 5.5, 5.5]);
+    pointsArray.push([...vertices[b], 5.5, -5.5]);
+    pointsArray.push([...vertices[c], -5.5, -5.5]);
+    pointsArray.push([...vertices[d], -5.5, 5.5]);
 }
 
 function cube() {
@@ -83,6 +86,8 @@ function cube() {
     quad(5, 4, 0, 1);
 }
 
+let cameraPosition = vec4(25., 0., 0., 0.);
+let upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -100,7 +105,7 @@ window.onload = function init() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
 
     // Create the texture for later use
-    generateTexture("fur");
+    generateTexture("bg");
 
     gl.useProgram(program);
 
@@ -109,7 +114,7 @@ window.onload = function init() {
     // Projection is changed to perspective for more realistic look
     projectionMatrix = perspective(45., (1. * canvas.clientWidth) / canvas.clientHeight, 10, 100.);
 
-    modelViewMatrix = mat4();
+    modelViewMatrix = lookAt(vec3(cameraPosition), vec3(0, 0, 0), vec3(subtract(upPosition, cameraPosition)));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
@@ -133,13 +138,19 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vTexPosition);
 
     gl.activeTexture(gl.TEXTURE0);
-    changeTexture("fur");
+    changeTexture("bg");
 
     render();
 };
 
 // Applies the updates in joint variables as transformations and renders the new position
 function render() {
+    let currentCamera = mult(mult(mat4(cameraPosition, upPosition), rotate(cameraX, 0, 1, 0)), rotate(cameraY, 0, 0, 1));
+
+    modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
+
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
+
     for (let key in figure) {
         initNodes(key);
     }
