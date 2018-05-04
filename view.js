@@ -94,8 +94,7 @@ const cubeIndex = [
 ];
 
 // Objects
-let cube;
-
+let cube, bezier;
 
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
@@ -113,6 +112,7 @@ window.onload = function init() {
 
     // Create the texture for later use
     generateTexture("bg");
+    generateTexture("fg");
     gl.activeTexture(gl.TEXTURE0);
     changeTexture("bg");
 
@@ -137,6 +137,12 @@ window.onload = function init() {
     cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex);
     initializeObject(cube);
 
+    generateCombinations();
+    runGrid();
+
+    bezier = generateObject(bezierVertexPos, bezierTextPos, bezierIndex);
+    initializeObject(bezier);
+
     render();
 };
 
@@ -150,7 +156,10 @@ function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    changeTexture("bg");
     renderObject(cube);
+    changeTexture("fg");
+    renderObject(bezier);
 }
 
 // Creates texture object
@@ -198,7 +207,7 @@ function initializeObject(obj) {
     obj["iBuf"].numItems = obj["index"].length / obj["iBuf"].itemSize;
 }
 
-function renderObject(obj){
+function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
 
