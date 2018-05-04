@@ -86,7 +86,10 @@ function cube() {
     quad(5, 4, 0, 1);
 }
 
-let cameraPosition = vec4(25., 0., 0., 0.);
+let cameraDistance = 25.0;
+let cameraMinDistance = 10.0;
+let cameraMaxDistance = 30.0;
+let cameraPosition = vec4(cameraDistance, 0., 0., 0.);
 let upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
 window.onload = function init() {
