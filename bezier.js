@@ -35,6 +35,10 @@ function bez(k, n, u) {
     return Math.pow(u, k) * Math.pow((1 - u), (n - k)) * combinations[n.toString()][k]
 }
 
+function duBez(k, n, u) {
+    return (Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k)) * (k * (1 - u) - u * (n - k))) * combinations[n.toString()][k]
+}
+
 function parametric(u, v) {
     let sum = vec3();
 
@@ -46,6 +50,38 @@ function parametric(u, v) {
     }
 
     return sum;
+}
+
+function duParametric(u, v) {
+    let sum = vec3();
+
+    for (let i = 0; i <= noControlPoints[0]; i++) {
+        for (let j = 0; j <= noControlPoints[1]; j++) {
+            for (let k = 0; k < 3; k++)
+                sum[k] += controlPoints[i][j][k] * bez(i, noControlPoints[0], v) * duBez(j, noControlPoints[1], u);
+        }
+    }
+
+    return sum;
+}
+
+function dvParametric(u, v) {
+    let sum = vec3();
+
+    for (let i = 0; i <= noControlPoints[0]; i++) {
+        for (let j = 0; j <= noControlPoints[1]; j++) {
+            for (let k = 0; k < 3; k++)
+                sum[k] += controlPoints[i][j][k] * duBez(i, noControlPoints[0], v) * bez(j, noControlPoints[1], u);
+        }
+    }
+
+    return sum;
+}
+
+function normal(u, v) {
+    const du = duParametric(u, v), dv = dvParametric(u, v);
+
+    return vec3(du[1] * dv[2] - dv[1] * du[2], du[2] * dv[0] - dv[2] * du[0], du[0] * dv[1] - dv[0] * du[1])
 }
 
 function runGrid() {
