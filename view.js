@@ -14,7 +14,7 @@ let projectionMatrix;
 let modelViewMatrix;
 let modelViewMatrixLoc;
 
-let intensityAmb = 0.5, intensityDiffuse = 0.5;
+let intensityAmb = 0.5, intensityLight = 0.5;
 
 // Textures are hold here to have access from multiple scripts
 let textures = {
@@ -144,14 +144,14 @@ window.onload = function init() {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1., 1.);
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1., 1., 1.);
     initializeObject(cube);
 
     generateControlPoints();
     generateCombinations();
     runGrid();
 
-    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1., 1.);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1., 1., 1.);
     initializeObject(surface);
 
     render();
@@ -162,6 +162,8 @@ function render() {
     let currentCamera = mult(mult(mat4(cameraPosition, upPosition), rotate(cameraX, 0, 1, 0)), rotate(cameraY, 0, 0, 1));
 
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
+
+    gl.uniform3fv(gl.getUniformLocation(program, "cameraPosition"), vec3(currentCamera[0]));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
@@ -190,7 +192,7 @@ function changeTexture(name) {
 }
 
 // Object system
-function generateObject(vPos, tPos, index, normal, amb, diff) {
+function generateObject(vPos, tPos, index, normal, amb, diff, spec) {
     return {
         "vPos": vPos,
         "tPos": tPos,
@@ -198,6 +200,7 @@ function generateObject(vPos, tPos, index, normal, amb, diff) {
         "index": index,
         "amb": amb,
         "diff": diff,
+        "spec": spec,
         "vBuf": gl.createBuffer(),
         "tBuf": gl.createBuffer(),
         "iBuf": gl.createBuffer(),
@@ -230,7 +233,9 @@ function initializeObject(obj) {
 function renderObject(obj) {
     gl.uniform4f(gl.getUniformLocation(program, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
 
-    gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"] * intensityDiffuse, obj["diff"] * intensityDiffuse, obj["diff"] * intensityDiffuse, 1);
+    gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"] * intensityLight, obj["diff"] * intensityLight, obj["diff"] * intensityLight, 1);
+
+    gl.uniform4f(gl.getUniformLocation(program, "specular"), obj["spec"] * intensityLight, obj["spec"] * intensityLight, obj["spec"] * intensityLight, 1);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);

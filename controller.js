@@ -97,11 +97,25 @@ function updateAmbient() {
     }
 }
 
-function updateDiffuse(){
-    if (Date.now() - lastUpdate > mspf){
+function updateDiffuse() {
+    if (Date.now() - lastUpdate > mspf) {
         cube["diff"] = parseFloat(document.getElementById("cubeDiffuse").value);
         surface["diff"] = parseFloat(document.getElementById("surfaceDiffuse").value);
-        intensityDiffuse = parseFloat(document.getElementById("intensityDiffuse").value);
+        requestAnimationFrame(render);
+    }
+}
+
+function updateSpecular() {
+    if (Date.now() - lastUpdate > mspf) {
+        cube["spec"] = parseFloat(document.getElementById("cubeSpecular").value);
+        surface["spec"] = parseFloat(document.getElementById("surfaceSpecular").value);
+        requestAnimationFrame(render);
+    }
+}
+
+function updateIntensity() {
+    if (Date.now() - lastUpdate > mspf) {
+        intensityLight = parseFloat(document.getElementById("intensity").value);
         requestAnimationFrame(render);
     }
 }
