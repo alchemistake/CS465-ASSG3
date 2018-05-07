@@ -5,7 +5,7 @@ let controlPoints = [];
 let noStep = 100;
 let stepSize = 1. / noStep;
 
-let surfaceVertexPos, surfaceTextPos, surfaceIndex;
+let surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal;
 
 function generateControlPoints() {
     controlPoints = [];
@@ -91,12 +91,14 @@ function runGrid() {
     surfaceVertexPos = [];
     surfaceTextPos = [];
     surfaceIndex = [];
+    surfaceNormal = [];
 
     for (let i = 0; i <= noStep; i++) {
         for (let j = 0; j <= noStep; j++) {
             let u = i * stepSize, v = j * stepSize;
             surfaceVertexPos.push(parametric(u, v));
-            surfaceTextPos.push(vec2(u, v))
+            surfaceTextPos.push(vec2(u, v));
+            surfaceNormal.push(normal(u, v));
         }
     }
 

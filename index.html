@@ -6,13 +6,9 @@
     <link rel="stylesheet" href="reset.css">
 
     <script id="vertex-shader" type="x-shader/x-vertex">
-
-    //References:
-    //[1] shahedSphere3
-
     attribute  vec4 vPosition;
     attribute vec2 vTexPosition;
-    varying vec2 fTexPosition;
+    attribute vec3 vNormal;
 
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
@@ -46,7 +42,7 @@
         fTexPosition = vTexPosition;
 
     }
-
+    
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -60,7 +56,7 @@
     void main(){
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
-
+    
     </script>
 
     <script type="text/javascript" src="Common/webgl-utils.js"></script>
@@ -99,11 +95,24 @@
     <button onclick="showOptions();">Show/Hide Controls</button>
     <div id="controls" hidden>
         Number of Control Points<br>
-        <input onchange="changeNoControlPoints();" id="noControlPointsX" type="number" value="4">
-        <input onchange="changeNoControlPoints();" id="noControlPointsY" type="number" value="4">
+        <input name="noControlPointsX" onchange="changeNoControlPoints();" id="noControlPointsX" type="number"
+               value="4">
+        <input name="noControlPointsY" onchange="changeNoControlPoints();" id="noControlPointsY" type="number"
+               value="4">
         <br>
         Step Number<br>
-        <input onchange="changeNoStep();" id="noStep" type="number" value="100">
+        <input name="noStep" onchange="changeNoStep();" id="noStep" type="number" value="100">
+        <br>
+        Ambient Light<br>
+        Cube Amb. Coef.
+        <input name="cubeAmb" oninput="updateAmbient();" id="cubeAmb" type="range" value="0.5" step="0.01" min="0"
+               max="1">
+        <br>Bezier Amb. Coef.
+        <input name="bezierAmb" oninput="updateAmbient();" id="bezierAmb" type="range" value="0.5" step="0.01" min="0"
+               max="1">
+        <br>Amb. Intensity
+        <input name="intensityAmb" oninput="updateAmbient();" id="intensityAmb" type="range" value="0.5" step="0.01"
+               min="0" max="1">
     </div>
 </div>
 </html>

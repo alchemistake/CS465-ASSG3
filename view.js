@@ -14,6 +14,8 @@ let projectionMatrix;
 let modelViewMatrix;
 let modelViewMatrixLoc;
 
+let cubeAmb = 0.5, bezierAmb = 0.5, intensityAmb = 0.5;
+
 // Textures are hold here to have access from multiple scripts
 let textures = {
     "bg": null,
@@ -92,6 +94,10 @@ const cubeIndex = [
     16, 17, 18, 16, 18, 19, // Right face
     20, 21, 22, 20, 22, 23  // Left face
 ];
+let cubeNormal = [];
+for (let i = 0; i < cubeVertexPos.length; i++) {
+    cubeNormal.push(cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
+}
 
 // Objects
 let cube, surface;
@@ -124,6 +130,9 @@ window.onload = function init() {
     program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
     gl.enableVertexAttribArray(program.textureCoordAttribute);
 
+    program.normalAttribute = gl.getAttribLocation(program, "vNormal");
+    gl.enableVertexAttribArray(program.normalAttribute);
+
     // Projection is changed to perspective for more realistic look
     projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
 
@@ -134,14 +143,14 @@ window.onload = function init() {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex);
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal);
     initializeObject(cube);
 
     generateControlPoints();
     generateCombinations();
     runGrid();
 
-    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
     initializeObject(surface);
 
     render();
@@ -153,6 +162,7 @@ function render() {
 
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
 
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -180,25 +190,28 @@ function changeTexture(name) {
 }
 
 // Object system
-function generateObject(vPos, tPos, index) {
+function generateObject(vPos, tPos, index, normal) {
     return {
         "vPos": vPos,
         "tPos": tPos,
+        "normal": normal,
         "index": index,
         "vBuf": gl.createBuffer(),
         "tBuf": gl.createBuffer(),
-        "iBuf": gl.createBuffer()
+        "iBuf": gl.createBuffer(),
+        "nBuf": gl.createBuffer()
     }
 }
 
-function updateObject(obj, vPos, tPos, index) {
+function updateObject(obj, vPos, tPos, index, normal) {
     if (vPos !== undefined)
         obj["vPos"] = vPos;
     if (tPos !== undefined)
         obj["tPos"] = tPos;
     if (index !== undefined)
         obj["index"] = index;
-
+    if (normal !== undefined)
+        obj["normal"] = normal;
 }
 
 function initializeObject(obj) {
@@ -212,6 +225,11 @@ function initializeObject(obj) {
     obj["tBuf"].itemSize = 2;
     obj["tBuf"].numItems = obj["tPos"].length / obj["tBuf"].itemSize;
 
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["nBuf"]);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(obj["normal"]), gl.STATIC_DRAW);
+    obj["nBuf"].itemSize = 3;
+    obj["nBuf"].numItems = obj["tPos"].length / obj["nBuf"].itemSize;
+
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(obj["index"]), gl.STATIC_DRAW);
     obj["iBuf"].itemSize = 1;
@@ -224,6 +242,9 @@ function renderObject(obj) {
 
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["tBuf"]);
     gl.vertexAttribPointer(program.textureCoordAttribute, obj["tBuf"].itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj["nBuf"]);
+    gl.vertexAttribPointer(program.normalAttribute, obj["nBuf"].itemSize, gl.FLOAT, false, 0, 0);
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
     gl.drawElements(gl.TRIANGLES, obj["iBuf"].numItems, gl.UNSIGNED_SHORT, 0);

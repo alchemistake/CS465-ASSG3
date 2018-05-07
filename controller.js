@@ -67,7 +67,7 @@ function changeNoControlPoints() {
     generateControlPoints();
     generateCombinations();
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
     initializeObject(surface);
     requestAnimationFrame(render);
 }
@@ -77,9 +77,18 @@ function changeNoStep() {
     stepSize = 1. / noStep;
 
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
     initializeObject(surface);
     requestAnimationFrame(render);
+}
+
+function updateAmbient() {
+    if (Date.now() - lastUpdate > mspf) {
+        cubeAmb = parseFloat(document.getElementById("cubeAmb").value);
+        bezierAmb = parseFloat(document.getElementById("bezierAmb").value);
+        intensityAmb = parseFloat(document.getElementById("intensityAmb").value);
+        requestAnimationFrame(render);
+    }
 }
 
 function pointOnCanvas(event) {
