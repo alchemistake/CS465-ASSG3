@@ -8,6 +8,8 @@
     <script id="vertex-shader" type="x-shader/x-vertex">
     attribute  vec4 vPosition;
     attribute vec2 vTexPosition;
+    attribute vec3 vNormal;
+
     varying vec2 fTexPosition;
 
     uniform mat4 modelViewMatrix;
@@ -18,9 +20,6 @@
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
     }
-
-
-
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -32,6 +31,7 @@
     void main(){
         gl_FragColor = texture2D(sampler, fTexPosition);
     }
+
 
 
 

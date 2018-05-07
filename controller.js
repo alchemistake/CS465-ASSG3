@@ -67,7 +67,7 @@ function changeNoControlPoints() {
     generateControlPoints();
     generateCombinations();
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
     initializeObject(surface);
     requestAnimationFrame(render);
 }
@@ -77,7 +77,7 @@ function changeNoStep() {
     stepSize = 1. / noStep;
 
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex);
+    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
     initializeObject(surface);
     requestAnimationFrame(render);
 }
