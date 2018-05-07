@@ -14,7 +14,7 @@ let projectionMatrix;
 let modelViewMatrix;
 let modelViewMatrixLoc;
 
-let cubeAmb = 0.5, bezierAmb = 0.5, intensityAmb = 0.5;
+let intensityAmb = 0.5;
 
 // Textures are hold here to have access from multiple scripts
 let textures = {
@@ -143,14 +143,14 @@ window.onload = function init() {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal);
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1.);
     initializeObject(cube);
 
     generateControlPoints();
     generateCombinations();
     runGrid();
 
-    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1.);
     initializeObject(surface);
 
     render();
@@ -162,7 +162,6 @@ function render() {
 
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -190,28 +189,18 @@ function changeTexture(name) {
 }
 
 // Object system
-function generateObject(vPos, tPos, index, normal) {
+function generateObject(vPos, tPos, index, normal, amb) {
     return {
         "vPos": vPos,
         "tPos": tPos,
         "normal": normal,
         "index": index,
+        "amb": amb,
         "vBuf": gl.createBuffer(),
         "tBuf": gl.createBuffer(),
         "iBuf": gl.createBuffer(),
         "nBuf": gl.createBuffer()
     }
-}
-
-function updateObject(obj, vPos, tPos, index, normal) {
-    if (vPos !== undefined)
-        obj["vPos"] = vPos;
-    if (tPos !== undefined)
-        obj["tPos"] = tPos;
-    if (index !== undefined)
-        obj["index"] = index;
-    if (normal !== undefined)
-        obj["normal"] = normal;
 }
 
 function initializeObject(obj) {
@@ -237,6 +226,8 @@ function initializeObject(obj) {
 }
 
 function renderObject(obj) {
+    gl.uniform4f(gl.getUniformLocation(program, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
+
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
 

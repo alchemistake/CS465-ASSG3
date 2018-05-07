@@ -67,7 +67,10 @@ function changeNoControlPoints() {
     generateControlPoints();
     generateCombinations();
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
+    surface["vPos"] = surfaceVertexPos;
+    surface["tPos"] = surfaceTextPos;
+    surface["index"] = surfaceIndex;
+    surface["normal"] = surfaceNormal;
     initializeObject(surface);
     requestAnimationFrame(render);
 }
@@ -77,15 +80,18 @@ function changeNoStep() {
     stepSize = 1. / noStep;
 
     runGrid();
-    updateObject(surface, surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal);
+    surface["vPos"] = surfaceVertexPos;
+    surface["tPos"] = surfaceTextPos;
+    surface["index"] = surfaceIndex;
+    surface["normal"] = surfaceNormal;
     initializeObject(surface);
     requestAnimationFrame(render);
 }
 
 function updateAmbient() {
     if (Date.now() - lastUpdate > mspf) {
-        cubeAmb = parseFloat(document.getElementById("cubeAmb").value);
-        bezierAmb = parseFloat(document.getElementById("bezierAmb").value);
+        cube["amb"] = parseFloat(document.getElementById("cubeAmb").value);
+        surface["amb"] = parseFloat(document.getElementById("surfaceAmb").value);
         intensityAmb = parseFloat(document.getElementById("intensityAmb").value);
         requestAnimationFrame(render);
     }

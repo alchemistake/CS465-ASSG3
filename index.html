@@ -13,24 +13,17 @@
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
 
-    attribute vec4 vNormal;
-
+    varying vec2 fTexPosition;
     varying vec4 fColor;
 
-    //Reference: https://stackoverflow.com/questions/26533414/how-to-use-uniform-to-change-color-in-webgl
-    uniform vec4 ambientU;
-
-    //uniform vec4 diffuseU;
-
-    //uniform vec4 specularU;
-
-    uniform vec3 L;
-    uniform float shininess;
+    uniform vec4 ambient;
 
     void main()
     {
+        //vec3 L = normalize(vec3(5, 5, 5));
 
-        //float Kd = max( dot(L, vNormal));
+        float Kd = max(dot(vNormal, vec3(0,0,0)), 0.0) * 10000.;
+        //vec4 diffuse = vec4(Kd + 0.1, Kd  + 0.1, Kd + 0.1, 1);
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
@@ -40,9 +33,7 @@
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
-
     }
-    
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -57,6 +48,7 @@
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
     
+
     </script>
 
     <script type="text/javascript" src="Common/webgl-utils.js"></script>
@@ -108,7 +100,7 @@
         <input name="cubeAmb" oninput="updateAmbient();" id="cubeAmb" type="range" value="0.5" step="0.01" min="0"
                max="1">
         <br>Bezier Amb. Coef.
-        <input name="bezierAmb" oninput="updateAmbient();" id="bezierAmb" type="range" value="0.5" step="0.01" min="0"
+        <input name="surfaceAmb" oninput="updateAmbient();" id="surfaceAmb" type="range" value="0.5" step="0.01" min="0"
                max="1">
         <br>Amb. Intensity
         <input name="intensityAmb" oninput="updateAmbient();" id="intensityAmb" type="range" value="0.5" step="0.01"
