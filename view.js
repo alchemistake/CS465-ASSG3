@@ -14,7 +14,7 @@ let projectionMatrix;
 let modelViewMatrix;
 let modelViewMatrixLoc;
 
-let intensityAmb = 0.5;
+let intensityAmb = 0.5, intensityDiffuse = 0.5;
 
 // Textures are hold here to have access from multiple scripts
 let textures = {
@@ -229,7 +229,7 @@ function initializeObject(obj) {
 function renderObject(obj) {
     gl.uniform4f(gl.getUniformLocation(program, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
 
-    gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"], obj["diff"], obj["diff"], 1);
+    gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"] * intensityDiffuse, obj["diff"] * intensityDiffuse, obj["diff"] * intensityDiffuse, 1);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);

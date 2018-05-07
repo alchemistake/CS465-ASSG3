@@ -20,23 +20,23 @@
     uniform vec4 ambient;
 
     // Diffuse
-    uniform vec4 lightIntensity;
     uniform vec3 lightPosition;
-    uniform vec4 diffuseCoefficient;
+    uniform vec4 diffuse;
 
     void main()
     {
-        vec4 diffuse = lightIntensity * diffuseCoefficient * dot(normalize(vNormal), normalize(lightPosition));
+        vec4 diffusePart = diffuse * dot(normalize(vNormal), normalize(lightPosition));
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
 
-        fColor = diffuse + ambient;
+        fColor = diffusePart + ambient;
         fColor.a = 1.0;
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
     }
+
 
     </script>
 
@@ -52,6 +52,7 @@
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
     
+
 
 
     </script>
@@ -100,7 +101,7 @@
         Step Number<br>
         <input name="noStep" onchange="changeNoStep();" id="noStep" type="number" value="100">
         <br>
-        Ambient Light<br>
+        <h2>Ambient Light</h2>
         Cube Amb. Coef.
         <input name="cubeAmb" oninput="updateAmbient();" id="cubeAmb" type="range" value="0.5" step="0.01" min="0"
                max="1">
@@ -112,16 +113,17 @@
                min="0" max="1">
 
         <br>
-        Diffuse Light
+        <h2>Diffuse Light</h2>
         <br>
         Cube Diff. Coef.
-        <input name = "cubeDiffuse" oninput="updateDiffuse();" id="cubeDiffuse" type="range" value="0.5" step="0.01"
+        <input name="cubeDiffuse" oninput="updateDiffuse();" id="cubeDiffuse" type="range" value="0.5" step="0.01"
                min="0" max="1">
         <br>Bezier Diff. Coef.
-        <input name = "surfaceDiffuse" oninput="updateDiffuse();" id="surfaceDiffuse" type="range" value="0.5" step="0.01"
+        <input name="surfaceDiffuse" oninput="updateDiffuse();" id="surfaceDiffuse" type="range" value="0.5" step="0.01"
                min="0" max="1">
         <br>Diff. Intensity
-        <input name = "intensityDiffuse" oninput="updateDiffuse();" id="intensityDiffuse" type="range" value="0.5" step="0.01"
+        <input name="intensityDiffuse" oninput="updateDiffuse();" id="intensityDiffuse" type="range" value="0.5"
+               step="0.01"
                min="0" max="1">
     </div>
 </div>
