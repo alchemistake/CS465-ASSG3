@@ -97,6 +97,13 @@ function updateAmbient() {
     }
 }
 
+function updateDiffuse(){
+    if (Date.now() - lastUpdate > mspf){
+
+        requestAnimationFrame(render);
+    }
+}
+
 function pointOnCanvas(event) {
     let x = event.x;
     let y = event.y;

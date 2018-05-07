@@ -189,13 +189,14 @@ function changeTexture(name) {
 }
 
 // Object system
-function generateObject(vPos, tPos, index, normal, amb) {
+function generateObject(vPos, tPos, index, normal, amb, diff) {
     return {
         "vPos": vPos,
         "tPos": tPos,
         "normal": normal,
         "index": index,
         "amb": amb,
+        "diff": diff,
         "vBuf": gl.createBuffer(),
         "tBuf": gl.createBuffer(),
         "iBuf": gl.createBuffer(),
@@ -227,6 +228,8 @@ function initializeObject(obj) {
 
 function renderObject(obj) {
     gl.uniform4f(gl.getUniformLocation(program, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
+
+    gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"], obj["diff"], obj["diff"], 1);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
