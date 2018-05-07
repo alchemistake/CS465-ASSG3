@@ -23,14 +23,19 @@
     uniform vec3 lightPosition;
     uniform vec4 diffuse;
 
+    // Specular
+    uniform vec4 specular;
+    uniform vec3 cameraPosition;
+
     void main()
     {
         vec4 diffusePart = diffuse * dot(normalize(vNormal), normalize(lightPosition));
+        vec4 specularPart = specular * dot(normalize(lightPosition + cameraPosition), vNormal);
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
 
-        fColor = diffusePart + ambient;
+        fColor = specularPart + diffusePart + ambient;
         fColor.a = 1.0;
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
