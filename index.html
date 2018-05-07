@@ -16,24 +16,28 @@
     varying vec2 fTexPosition;
     varying vec4 fColor;
 
+    // Ambient
     uniform vec4 ambient;
+
+    // Diffuse
+    uniform vec4 lightIntensity;
+    uniform vec3 lightPosition;
+    uniform vec4 diffuseCoefficient;
 
     void main()
     {
-        //vec3 L = normalize(vec3(5, 5, 5));
-
-        float Kd = max(dot(vNormal, vec3(0,0,0)), 0.0) * 10000.;
-        //vec4 diffuse = vec4(Kd + 0.1, Kd  + 0.1, Kd + 0.1, 1);
+        vec4 diffuse = lightIntensity * diffuseCoefficient * dot(normalize(vNormal), normalize(lightPosition));
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
 
-        fColor = ambient;
+        fColor = diffuse + ambient;
         fColor.a = 1.0;
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
     }
+
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -48,6 +52,7 @@
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
     
+
 
     </script>
 
