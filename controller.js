@@ -82,6 +82,15 @@ function changeNoStep() {
     requestAnimationFrame(render);
 }
 
+function updateAmbient() {
+    if (Date.now() - lastUpdate > mspf) {
+        cubeAmb = parseFloat(document.getElementById("cubeAmb").value);
+        bezierAmb = parseFloat(document.getElementById("bezierAmb").value);
+        intensityAmb = parseFloat(document.getElementById("intensityAmb").value);
+        requestAnimationFrame(render);
+    }
+}
+
 function pointOnCanvas(event) {
     let x = event.x;
     let y = event.y;

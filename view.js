@@ -14,6 +14,8 @@ let projectionMatrix;
 let modelViewMatrix;
 let modelViewMatrixLoc;
 
+let cubeAmb = 0.5, bezierAmb = 0.5, intensityAmb = 0.5;
+
 // Textures are hold here to have access from multiple scripts
 let textures = {
     "bg": null,
@@ -93,8 +95,7 @@ const cubeIndex = [
     20, 21, 22, 20, 22, 23  // Left face
 ];
 let cubeNormal = [];
-
-for (var i = 0; i < cubeVertexPos.length; i++) {
+for (let i = 0; i < cubeVertexPos.length; i++) {
     cubeNormal.push(cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
 }
 
@@ -161,6 +162,7 @@ function render() {
 
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
 
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

@@ -6,41 +6,27 @@
     <link rel="stylesheet" href="reset.css">
 
     <script id="vertex-shader" type="x-shader/x-vertex">
-
-    //References:
-    //[1] shahedSphere3
-
     attribute  vec4 vPosition;
     attribute vec2 vTexPosition;
     attribute vec3 vNormal;
 
-    varying vec2 fTexPosition;
-
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
 
-
-
-    attribute vec4 vNormal;
-
+    varying vec2 fTexPosition;
     varying vec4 fColor;
-
-
 
     void main()
     {
-
         float shininess = 0.5;
         vec4 ambientProduct;
         vec4 diffuseProduct;
         vec4 specularProduct;
 
+        vec3 L = normalize(vec3(5, 5, 5));
 
-        //[1]
-        vec3 L = normalize([0, 0, 15 ]);
-
-        float Kd = max( dot(L, vNormal));
-        vec4 diffuse = Kd;
+        float Kd = max(dot(vNormal, L), 0.0) * 10000.;
+        vec4 diffuse = vec4(Kd + 0.1, Kd  + 0.1, Kd + 0.1, 1);
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
@@ -50,11 +36,9 @@
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
-
-
-
-
     }
+
+
     </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
@@ -68,6 +52,8 @@
     void main(){
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
+
+
 
 
 
@@ -110,11 +96,24 @@
     <button onclick="showOptions();">Show/Hide Controls</button>
     <div id="controls" hidden>
         Number of Control Points<br>
-        <input onchange="changeNoControlPoints();" id="noControlPointsX" type="number" value="4">
-        <input onchange="changeNoControlPoints();" id="noControlPointsY" type="number" value="4">
+        <input name="noControlPointsX" onchange="changeNoControlPoints();" id="noControlPointsX" type="number"
+               value="4">
+        <input name="noControlPointsY" onchange="changeNoControlPoints();" id="noControlPointsY" type="number"
+               value="4">
         <br>
         Step Number<br>
-        <input onchange="changeNoStep();" id="noStep" type="number" value="100">
+        <input name="noStep" onchange="changeNoStep();" id="noStep" type="number" value="100">
+        <br>
+        Ambient Light<br>
+        Cube Amb. Coef.
+        <input name="cubeAmb" oninput="updateAmbient();" id="cubeAmb" type="range" value="0.5" step="0.01" min="0"
+               max="1">
+        <br>Bezier Amb. Coef.
+        <input name="bezierAmb" oninput="updateAmbient();" id="bezierAmb" type="range" value="0.5" step="0.01" min="0"
+               max="1">
+        <br>Amb. Intensity
+        <input name="intensityAmb" oninput="updateAmbient();" id="intensityAmb" type="range" value="0.5" step="0.01"
+               min="0" max="1">
     </div>
 </div>
 </html>
