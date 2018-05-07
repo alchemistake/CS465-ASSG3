@@ -17,44 +17,35 @@
     uniform mat4 modelViewMatrix;
     uniform mat4 projectionMatrix;
 
-
-
     attribute vec4 vNormal;
 
     varying vec4 fColor;
 
+    //Reference: https://stackoverflow.com/questions/26533414/how-to-use-uniform-to-change-color-in-webgl
+    uniform vec4 ambientU;
 
+    //uniform vec4 diffuseU;
+
+    //uniform vec4 specularU;
+
+    uniform vec3 L;
+    uniform float shininess;
 
     void main()
     {
 
-        float shininess = 0.5;
-        vec4 ambientProduct;
-        vec4 diffuseProduct;
-        vec4 specularProduct;
-
-
-        //[1]
-        vec3 L = normalize([0, 0, 15 ]);
-
-        float Kd = max( dot(L, vNormal));
-        vec4 diffuse = Kd;
+        //float Kd = max( dot(L, vNormal));
 
         //float Ks = pow( max(dot(N, H), 0.0), shininess);
         //vec4 specular =
 
-        fColor = diffuse;
+        fColor = ambient;
         fColor.a = 1.0;
 
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
 
-
-
-
     }
-
-
 
     </script>
 
@@ -69,8 +60,6 @@
     void main(){
         gl_FragColor = texture2D(sampler, fTexPosition) * fColor;
     }
-
-
 
     </script>
 
