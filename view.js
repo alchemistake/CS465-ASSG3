@@ -96,7 +96,7 @@ const cubeIndex = [
 ];
 let cubeNormal = [];
 for (let i = 0; i < cubeVertexPos.length; i++) {
-    cubeNormal.push(cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
+    cubeNormal.push(-1 * cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
 }
 
 // Objects
@@ -140,17 +140,18 @@ window.onload = function init() {
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
+    gl.uniform3fv(gl.getUniformLocation(program, "lightPosition"), new Float32Array([5, 5, 5]));
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1.);
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1., 1.);
     initializeObject(cube);
 
     generateControlPoints();
     generateCombinations();
     runGrid();
 
-    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1.);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1., 1.);
     initializeObject(surface);
 
     render();
