@@ -39,7 +39,9 @@ function bezier(k, n, u) {
 }
 
 function duBezier(k, n, u) {
-    return (Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k)) * (k * (1 - u) - u * (n - k))) * combinations[n.toString()][k]
+    if (k < 1 && u === 0)
+        return 0.;
+    return Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k - 1)) * (k * (1 - u) - u * (n - k)) * combinations[n.toString()][k];
 }
 
 function parametric(u, v) {

@@ -17,9 +17,8 @@ let modelViewMatrixLoc;
 let intensityAmb = 0.5, intensityLight = 0.5;
 
 // Textures are hold here to have access from multiple scripts
-let textures = {
-    "bg": null,
-};
+let textures = {};
+let activeTexture = "marble";
 
 // Cube constants
 const cubeVertexPos = [
@@ -114,44 +113,31 @@ window.onload = function init() {
     gl.clearColor(.5, .5, .5, 1.0);
     gl.enable(gl.DEPTH_TEST);
 
-    program = initShaders(gl, "vertex-shader", "fragment-shader");
+    program = loadGouraud();
 
     // Create the texture for later use
+    generateTexture("kulaksız");
     generateTexture("bg");
-    generateTexture("fg");
+    generateTexture("marble");
     gl.activeTexture(gl.TEXTURE0);
-    changeTexture("bg");
-
-    gl.useProgram(program);
-
-    program.vertexPositionAttribute = gl.getAttribLocation(program, "vPosition");
-    gl.enableVertexAttribArray(program.vertexPositionAttribute);
-
-    program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
-    gl.enableVertexAttribArray(program.textureCoordAttribute);
-
-    program.normalAttribute = gl.getAttribLocation(program, "vNormal");
-    gl.enableVertexAttribArray(program.normalAttribute);
 
     // Projection is changed to perspective for more realistic look
     projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
-
     modelViewMatrix = lookAt(vec3(cameraPosition), vec3(), vec3(subtract(upPosition, cameraPosition)));
 
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
-    gl.uniform3fv(gl.getUniformLocation(program, "lightPosition"), new Float32Array([5, 5, 5]));
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
 
-    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, 1., 1., 1.);
+    cube = generateObject(cubeVertexPos, cubeTextPos, cubeIndex, cubeNormal, .5, .5, .5);
     initializeObject(cube);
 
     generateControlPoints();
     generateCombinations();
     runGrid();
 
-    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, 1., 1., 1.);
+    surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, .5, .5, .5);
     initializeObject(surface);
 
     render();
@@ -169,9 +155,9 @@ function render() {
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    changeTexture("fg");
-    renderObject(cube);
     changeTexture("bg");
+    renderObject(cube);
+    changeTexture(activeTexture);
     renderObject(surface);
 }
 
@@ -248,4 +234,22 @@ function renderObject(obj) {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
     gl.drawElements(gl.TRIANGLES, obj["iBuf"].numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+function loadGouraud() {
+    program = initShaders(gl, "gouraud-vs", "gouraud-fs");
+    gl.useProgram(program);
+
+    program.vertexPositionAttribute = gl.getAttribLocation(program, "vPosition");
+    gl.enableVertexAttribArray(program.vertexPositionAttribute);
+
+    program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
+    gl.enableVertexAttribArray(program.textureCoordAttribute);
+
+    program.normalAttribute = gl.getAttribLocation(program, "vNormal");
+    gl.enableVertexAttribArray(program.normalAttribute);
+
+    gl.uniform3fv(gl.getUniformLocation(program, "lightPosition"), new Float32Array([5, 5, 5]));
+
+    return program;
 }

@@ -120,6 +120,11 @@ function updateIntensity() {
     }
 }
 
+function setTexture(el) {
+    activeTexture = el.innerText;
+    requestAnimationFrame(render);
+}
+
 function pointOnCanvas(event) {
     let x = event.x;
     let y = event.y;
