@@ -31,8 +31,9 @@
     {
         vec3 lightVector = normalize(lightPosition - vPosition.xyz);
         vec3 cameraVector = normalize(cameraPosition - vPosition.xyz);
-        vec4 diffusePart = -1. * diffuse * dot(normalize(vNormal), lightVector);
-        vec4 specularPart = specular * dot(normalize(lightVector + cameraVector), normalize(vNormal));
+        vec3 normalVector = normalize(vNormal);
+        vec4 diffusePart = -1. * diffuse * max(dot(normalVector, lightVector), 0.);
+        vec4 specularPart = specular * max(dot((lightVector - 2. * dot(lightVector, normalVector) * normalVector),cameraVector),0.);
 
         fColor = specularPart + diffusePart + ambient;
         fColor.a = 1.0;
@@ -42,8 +43,8 @@
         fTexPosition = vTexPosition;
     }
 
-    </script>
 
+    </script>
     <script id="gouraud-fs" type="x-shader/x-fragment">
     precision mediump float;
 
@@ -62,6 +63,7 @@
     }
 
 
+
     </script>
 
     <script id="wireframe-vs" type="x-shader/x-vertex">
@@ -77,14 +79,78 @@
     }
 
 
-    </script>
 
+    </script>
     <script id="wireframe-fs" type="x-shader/x-fragment">
     precision mediump float;
 
     void main(){
         gl_FragColor = vec4(0.,0.,0.,1.);
     }
+
+
+    </script>
+
+    <script id="phong-vs" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    attribute vec2 vTexPosition;
+    attribute vec3 vNormal;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    varying vec2 fTexPosition;
+    varying vec3 normalVector, lightVector, cameraVector;
+
+    // Diffuse
+    uniform vec3 lightPosition;
+
+    // Specular
+    uniform vec3 cameraPosition;
+
+    void main()
+    {
+        lightVector = normalize(lightPosition - vPosition.xyz);
+        cameraVector = normalize(cameraPosition - vPosition.xyz);
+        normalVector = normalize(vNormal);
+
+
+        gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        fTexPosition = vTexPosition;
+    }
+
+
+
+    </script>
+    <script id="phong-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    varying vec2 fTexPosition;
+    uniform sampler2D sampler;
+
+    uniform vec4 specular;
+    uniform vec4 diffuse;
+    uniform vec4 ambient;
+
+    varying vec3 normalVector, lightVector, cameraVector;
+
+    void main(){
+        vec4 diffusePart = -1. * diffuse * max(dot(normalize(normalVector), lightVector), 0.);
+        vec4 specularPart = specular * max(dot((lightVector - 2. * dot(lightVector, normalVector) * normalVector),cameraVector),0.);
+
+        vec4 fColor = specularPart + diffusePart + ambient;
+        fColor.a = 1.0;
+
+        vec4 rColor = texture2D(sampler, fTexPosition) * fColor;
+        rColor.r = min(rColor.r, 1.);
+        rColor.g = min(rColor.g, 1.);
+        rColor.b = min(rColor.b, 1.);
+        rColor.a = 1.;
+        gl_FragColor = rColor;
+    }
+
+
+
 
     </script>
 
@@ -140,7 +206,7 @@
         <input name="noStep" onchange="changeNoStep();" id="noStep" type="number" value="100">
 
 
-        <h2>Light Intensity</h2>
+        <h2>Light</h2>
         Amb. Intensity
         <input name="intensityAmb" oninput="updateAmbient();" id="intensityAmb" type="range" value="0.5" step="0.01"
                min="0" max="1">
@@ -148,6 +214,18 @@
         <input name="intensity" oninput="updateIntensity();" id="intensity" type="range" value="0.5"
                step="0.01"
                min="0" max="3">
+        <br>X
+        <input name="positionX" oninput="requestAnimationFrame(render);" id="positionX" type="range" value="0.5"
+               step="0.01"
+               min="-10" max="10">
+        <br>Y
+        <input name="positionY" oninput="requestAnimationFrame(render);" id="positionY" type="range" value="0.5"
+               step="0.01"
+               min="-10" max="10">
+        <br>X
+        <input name="positionZ" oninput="requestAnimationFrame(render);" id="positionZ" type="range" value="0.5"
+               step="0.01"
+               min="-10" max="10">
 
 
         <h2>Ambient</h2>
@@ -186,6 +264,7 @@
         <h2>Shading Mode</h2>
         <button onclick="loadGouraudShader();requestAnimationFrame(render);">Gourard</button>
         <button onclick="loadWireframeShader();requestAnimationFrame(render);">Wireframe</button>
+        <button onclick="loadPhongShader();requestAnimationFrame(render);">Phong</button>
     </div>
 </div>
 </html>

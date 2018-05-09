@@ -8,7 +8,7 @@ let upPosition = add(cameraPosition, vec4(0., 1.));
 
 let canvas;
 let gl;
-let curProgram, wireframeProgram, gouraudProgram;
+let curProgram, wireframeProgram, gouraudProgram, phongProgram;
 
 let projectionMatrix;
 let modelViewMatrix;
@@ -128,6 +128,7 @@ window.onload = function init() {
 
     wireframeProgram = initShaders(gl, "wireframe-vs", "wireframe-fs");
     gouraudProgram = initShaders(gl, "gouraud-vs", "gouraud-fs");
+    phongProgram = initShaders(gl, "phong-vs", "phong-fs");
     // loadWireframeShader();
     loadGouraudShader();
 
@@ -145,8 +146,10 @@ function render() {
 
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
 
-    if (currentCamera !== "wireframe")
+    if (currentCamera !== "wireframe") {
         gl.uniform3fv(gl.getUniformLocation(curProgram, "cameraPosition"), vec3(currentCamera[0]));
+        gl.uniform3fv(gl.getUniformLocation(curProgram, "lightPosition"), new Float32Array([parseFloat(document.getElementById("positionX").value), parseFloat(document.getElementById("positionY").value), parseFloat(document.getElementById("positionZ").value)]));
+    }
 
     gl.uniformMatrix4fv(gl.getUniformLocation(curProgram, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
@@ -256,7 +259,28 @@ function loadGouraudShader() {
     curProgram.normalAttribute = gl.getAttribLocation(curProgram, "vNormal");
     gl.enableVertexAttribArray(curProgram.normalAttribute);
 
-    gl.uniform3fv(gl.getUniformLocation(curProgram, "lightPosition"), new Float32Array([5, 5, 5]));
+    updateMVPMatrices();
+
+    cube["index"] = cubeIndex;
+    initializeObject(cube);
+    surface["index"] = surfaceIndex;
+    initializeObject(surface);
+}
+
+function loadPhongShader() {
+    curProgram = phongProgram;
+    currentShader = "phong";
+
+    gl.useProgram(curProgram);
+
+    curProgram.vertexPositionAttribute = gl.getAttribLocation(curProgram, "vPosition");
+    gl.enableVertexAttribArray(curProgram.vertexPositionAttribute);
+
+    curProgram.textureCoordAttribute = gl.getAttribLocation(curProgram, "vTexPosition");
+    gl.enableVertexAttribArray(curProgram.textureCoordAttribute);
+
+    curProgram.normalAttribute = gl.getAttribLocation(curProgram, "vNormal");
+    gl.enableVertexAttribArray(curProgram.normalAttribute);
 
     updateMVPMatrices();
 
