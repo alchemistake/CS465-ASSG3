@@ -123,7 +123,6 @@ function runGrid() {
             surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j);
             surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j);
             surfaceWireframeIndex.push(i * (noStep + 1) + j);
-
         }
     }
 }

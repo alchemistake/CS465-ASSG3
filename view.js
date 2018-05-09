@@ -8,7 +8,7 @@ let upPosition = add(cameraPosition, vec4(0., 1.));
 
 let canvas;
 let gl;
-let program;
+let curProgram, wireframeProgram, gouraudProgram;
 
 let projectionMatrix;
 let modelViewMatrix;
@@ -19,12 +19,6 @@ let intensityAmb = 0.5, intensityLight = 0.5;
 // Textures are hold here to have access from multiple scripts
 let textures = {};
 let activeTexture = "marble";
-
-let gouraudVS, gouraudFS;
-let wireframeVS, wireframeFS;
-let currentVS, currentFS;
-
-let msg;
 
 // Cube constants
 const cubeVertexPos = [
@@ -102,7 +96,7 @@ const cubeIndex = [
 const cubeWireframeIndex = [0, 1, 1, 2, 2, 3, 3, 0, 0, 4, 1, 7, 3, 5, 2, 6, 4, 5, 5, 6, 6, 7, 7, 4];
 let cubeNormal = [];
 for (let i = 0; i < cubeVertexPos.length; i++) {
-    cubeNormal.push(cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
+    cubeNormal.push(-1 * cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
 }
 
 // Objects
@@ -122,18 +116,6 @@ window.onload = function init() {
     gl.clearColor(1., 1., 1., 1.);
     gl.enable(gl.DEPTH_TEST);
 
-    compileShaders();
-    loadWireframeShader();
-
-    // Projection is changed to perspective for more realistic look
-    projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
-    modelViewMatrix = lookAt(vec3(cameraPosition), vec3(), vec3(subtract(upPosition, cameraPosition)));
-
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "projectionMatrix"), false, flatten(projectionMatrix));
-
-    modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
-
     cube = generateObject(cubeVertexPos, cubeTextPos, cubeWireframeIndex, cubeNormal, .5, .5, .5);
     initializeObject(cube);
 
@@ -143,6 +125,15 @@ window.onload = function init() {
 
     surface = generateObject(surfaceVertexPos, surfaceTextPos, surfaceWireframeIndex, surfaceNormal, .5, .5, .5);
     initializeObject(surface);
+
+    wireframeProgram = initShaders(gl, "wireframe-vs", "wireframe-fs");
+    gouraudProgram = initShaders(gl, "gouraud-vs", "gouraud-fs");
+    loadWireframeShader();
+
+    generateTexture("kulaksız");
+    generateTexture("bg");
+    generateTexture("marble");
+    gl.activeTexture(gl.TEXTURE0);
 
     render();
 };
@@ -154,9 +145,9 @@ function render() {
     modelViewMatrix = lookAt(vec3(currentCamera[0]), vec3(0, 0, 0), vec3(subtract(currentCamera[1], currentCamera[0])));
 
     if (currentCamera !== "wireframe")
-        gl.uniform3fv(gl.getUniformLocation(program, "cameraPosition"), vec3(currentCamera[0]));
+        gl.uniform3fv(gl.getUniformLocation(curProgram, "cameraPosition"), vec3(currentCamera[0]));
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(program, "modelViewMatrix"), false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(curProgram, "modelViewMatrix"), false, flatten(modelViewMatrix));
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -225,20 +216,20 @@ function initializeObject(obj) {
 
 function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
-    gl.vertexAttribPointer(program.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(curProgram.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
 
     if (currentShader !== "wireframe") {
-        gl.uniform4f(gl.getUniformLocation(program, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
+        gl.uniform4f(gl.getUniformLocation(curProgram, "ambient"), obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, obj["amb"] * intensityAmb, 1);
 
-        gl.uniform4f(gl.getUniformLocation(program, "diffuse"), obj["diff"] * intensityLight, obj["diff"] * intensityLight, obj["diff"] * intensityLight, 1);
+        gl.uniform4f(gl.getUniformLocation(curProgram, "diffuse"), obj["diff"] * intensityLight, obj["diff"] * intensityLight, obj["diff"] * intensityLight, 1);
 
-        gl.uniform4f(gl.getUniformLocation(program, "specular"), obj["spec"] * intensityLight, obj["spec"] * intensityLight, obj["spec"] * intensityLight, 1);
+        gl.uniform4f(gl.getUniformLocation(curProgram, "specular"), obj["spec"] * intensityLight, obj["spec"] * intensityLight, obj["spec"] * intensityLight, 1);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, obj["tBuf"]);
-        gl.vertexAttribPointer(program.textureCoordAttribute, obj["tBuf"].itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(curProgram.textureCoordAttribute, obj["tBuf"].itemSize, gl.FLOAT, false, 0, 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, obj["nBuf"]);
-        gl.vertexAttribPointer(program.normalAttribute, obj["nBuf"].itemSize, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(curProgram.normalAttribute, obj["nBuf"].itemSize, gl.FLOAT, false, 0, 0);
     }
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj["iBuf"]);
@@ -250,162 +241,54 @@ function renderObject(obj) {
 }
 
 function loadGouraudShader() {
-    if (currentVS)
-        gl.detachShader(program, currentVS);
-    if (currentFS)
-        gl.detachShader(program, currentFS);
+    curProgram = gouraudProgram;
+    currentShader = "gouraud";
 
-    currentVS = gouraudFS;
-    currentFS = gouraudVS;
+    gl.useProgram(curProgram);
 
-    gl.attachShader(program, gouraudVS);
-    gl.attachShader(program, gouraudFS);
-    gl.linkProgram(program);
+    curProgram.vertexPositionAttribute = gl.getAttribLocation(curProgram, "vPosition");
+    gl.enableVertexAttribArray(curProgram.vertexPositionAttribute);
 
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        msg = "Shader program failed to link.  The error log is:"
-            + "<pre>" + gl.getProgramInfoLog(program) + "</pre>";
-        alert(msg);
-        return -1;
-    }
+    curProgram.textureCoordAttribute = gl.getAttribLocation(curProgram, "vTexPosition");
+    gl.enableVertexAttribArray(curProgram.textureCoordAttribute);
 
-    program.vertexPositionAttribute = gl.getAttribLocation(program, "vPosition");
-    gl.enableVertexAttribArray(program.vertexPositionAttribute);
+    curProgram.normalAttribute = gl.getAttribLocation(curProgram, "vNormal");
+    gl.enableVertexAttribArray(curProgram.normalAttribute);
 
-    program.textureCoordAttribute = gl.getAttribLocation(program, "vTexPosition");
-    gl.enableVertexAttribArray(program.textureCoordAttribute);
+    gl.uniform3fv(gl.getUniformLocation(curProgram, "lightPosition"), new Float32Array([5, 5, 5]));
 
-    program.normalAttribute = gl.getAttribLocation(program, "vNormal");
-    gl.enableVertexAttribArray(program.normalAttribute);
+    updateMVPMatrices();
 
-    gl.uniform3fv(gl.getUniformLocation(program, "lightPosition"), new Float32Array([5, 5, 5]));
-
-    gl.useProgram(program);
-
-    generateTexture("kulaksız");
-    generateTexture("bg");
-    generateTexture("marble");
-    gl.activeTexture(gl.TEXTURE0);
+    cube["index"] = cubeIndex;
+    initializeObject(cube);
+    surface["index"] = surfaceIndex;
+    initializeObject(surface);
 }
 
 function loadWireframeShader() {
-    if (currentVS)
-        gl.detachShader(program, currentVS);
-    if (currentFS)
-        gl.detachShader(program, currentFS);
-
-    currentVS = wireframeVS;
-    currentFS = wireframeFS;
-
-    gl.attachShader(program, wireframeVS);
-    gl.attachShader(program, wireframeFS);
-    gl.linkProgram(program);
-
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        msg = "Shader program failed to link.  The error log is:"
-            + "<pre>" + gl.getProgramInfoLog(program) + "</pre>";
-        alert(msg);
-        return -1;
-    }
-
-    gl.useProgram(program);
-
-    program.vertexPositionAttribute = gl.getAttribLocation(program, "vPosition");
-    gl.enableVertexAttribArray(program.vertexPositionAttribute);
-}
-
-function switchToWireframeShader() {
+    curProgram = wireframeProgram;
     currentShader = "wireframe";
 
-    loadWireframeShader();
+    gl.useProgram(curProgram);
+
+    curProgram.vertexPositionAttribute = gl.getAttribLocation(curProgram, "vPosition");
+    gl.enableVertexAttribArray(curProgram.vertexPositionAttribute);
+
+    updateMVPMatrices();
 
     cube["index"] = cubeWireframeIndex;
+    initializeObject(cube);
     surface["index"] = surfaceWireframeIndex;
-
-    render();
+    initializeObject(surface);
 }
 
-function switchToGouraudShader() {
-    currentShader = "gouraud";
+function updateMVPMatrices() {
+    // Projection is changed to perspective for more realistic look
+    projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
+    modelViewMatrix = lookAt(vec3(cameraPosition), vec3(), vec3(subtract(upPosition, cameraPosition)));
 
-    loadGouraudShader();
+    gl.uniformMatrix4fv(gl.getUniformLocation(curProgram, "modelViewMatrix"), false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(curProgram, "projectionMatrix"), false, flatten(projectionMatrix));
 
-    cube["index"] = cubeIndex;
-    surface["index"] = surfaceIndex;
-
-    render();
-}
-
-function compileShaders() {
-    let msg;
-
-    let vertElem = document.getElementById("wireframe-vs");
-    if (!vertElem) {
-        alert("Unable to load vertex shader wireframe-vs");
-        return -1;
-    }
-    else {
-        wireframeVS = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(wireframeVS, vertElem.text);
-        gl.compileShader(wireframeVS);
-        if (!gl.getShaderParameter(wireframeVS, gl.COMPILE_STATUS)) {
-            msg = "Vertex shader failed to compile.  The error log is:"
-                + "<pre>" + gl.getShaderInfoLog(wireframeVS) + "</pre>";
-            alert(msg);
-            return -1;
-        }
-    }
-
-    let fragElem = document.getElementById("wireframe-fs");
-    if (!fragElem) {
-        alert("Unable to load Fragment shader wireframe-fs");
-        return -1;
-    }
-    else {
-        wireframeFS = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(wireframeFS, fragElem.text);
-        gl.compileShader(wireframeFS);
-        if (!gl.getShaderParameter(wireframeFS, gl.COMPILE_STATUS)) {
-            msg = "Fragment shader failed to compile.  The error log is:"
-                + "<pre>" + gl.getShaderInfoLog(wireframeFS) + "</pre>";
-            alert(msg);
-            return -1;
-        }
-    }
-
-    vertElem = document.getElementById("gouraud-vs");
-    if (!vertElem) {
-        alert("Unable to load vertex shader gouraud-vs");
-        return -1;
-    }
-    else {
-        gouraudVS = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(gouraudVS, vertElem.text);
-        gl.compileShader(gouraudVS);
-        if (!gl.getShaderParameter(gouraudVS, gl.COMPILE_STATUS)) {
-            msg = "Vertex shader failed to compile.  The error log is:"
-                + "<pre>" + gl.getShaderInfoLog(gouraudVS) + "</pre>";
-            alert(msg);
-            return -1;
-        }
-    }
-
-    fragElem = document.getElementById("gouraud-fs");
-    if (!fragElem) {
-        alert("Unable to load Fragment shader gouraud-fs");
-        return -1;
-    }
-    else {
-        gouraudFS = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(gouraudFS, fragElem.text);
-        gl.compileShader(gouraudFS);
-        if (!gl.getShaderParameter(gouraudFS, gl.COMPILE_STATUS)) {
-            msg = "Fragment shader failed to compile.  The error log is:"
-                + "<pre>" + gl.getShaderInfoLog(gouraudFS) + "</pre>";
-            alert(msg);
-            return -1;
-        }
-    }
-
-    program = gl.createProgram();
+    modelViewMatrixLoc = gl.getUniformLocation(curProgram, "modelViewMatrix");
 }
