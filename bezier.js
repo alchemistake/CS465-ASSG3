@@ -2,10 +2,10 @@
 let noControlPoints = [4, 4];
 let combinations = {};
 let controlPoints = [];
-let noStep = 100;
+let noStep = 10;
 let stepSize = 1. / noStep;
 
-let surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal;
+let surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, surfaceWireframeIndex;
 
 function generateControlPoints() {
     controlPoints = [];
@@ -94,6 +94,7 @@ function runGrid() {
     surfaceTextPos = [];
     surfaceIndex = [];
     surfaceNormal = [];
+    surfaceWireframeIndex = [];
 
     for (let i = 0; i <= noStep; i++) {
         for (let j = 0; j <= noStep; j++) {
@@ -106,12 +107,23 @@ function runGrid() {
 
     for (let i = 0; i < noStep; i++) {
         for (let j = 0; j < noStep; j++) {
-            surfaceIndex.push(j * (noStep + 1) + i);
-            surfaceIndex.push(j * (noStep + 1) + i + 1);
-            surfaceIndex.push((j + 1) * (noStep + 1) + i);
-            surfaceIndex.push(j * (noStep + 1) + i + 1);
-            surfaceIndex.push((j + 1) * (noStep + 1) + i + 1);
-            surfaceIndex.push((j + 1) * (noStep + 1) + i);
+            surfaceIndex.push(i * (noStep + 1) + j);
+            surfaceIndex.push(i * (noStep + 1) + j + 1);
+            surfaceIndex.push((i + 1) * (noStep + 1) + j);
+
+            surfaceIndex.push(i * (noStep + 1) + j + 1);
+            surfaceIndex.push((i + 1) * (noStep + 1) + j);
+            surfaceIndex.push((i + 1) * (noStep + 1) + j + 1);
+
+            surfaceWireframeIndex.push(i * (noStep + 1) + j);
+            surfaceWireframeIndex.push(i * (noStep + 1) + j + 1);
+            surfaceWireframeIndex.push(i * (noStep + 1) + j + 1);
+            surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j + 1);
+            surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j + 1);
+            surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j);
+            surfaceWireframeIndex.push((i + 1) * (noStep + 1) + j);
+            surfaceWireframeIndex.push(i * (noStep + 1) + j);
+
         }
     }
 }

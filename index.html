@@ -31,7 +31,7 @@
     {
         vec3 lightVector = normalize(lightPosition - vPosition.xyz);
         vec3 cameraVector = normalize(cameraPosition - vPosition.xyz);
-        vec4 diffusePart = diffuse * dot(normalize(vNormal), lightVector);
+        vec4 diffusePart = -1. * diffuse * dot(normalize(vNormal), lightVector);
         vec4 specularPart = specular * dot(normalize(lightVector + cameraVector), normalize(vNormal));
 
         fColor = specularPart + diffusePart + ambient;
@@ -41,8 +41,6 @@
         gl_Position = projectionMatrix * modelViewMatrix * vPosition;
         fTexPosition = vTexPosition;
     }
-
-
 
     </script>
 
@@ -62,6 +60,32 @@
         rColor.a = 1.;
         gl_FragColor = rColor;
     }
+
+
+    </script>
+
+    <script id="wireframe-vs" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    attribute vec3 vNormal;
+
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+
+    void main()
+    {
+        gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+    }
+
+
+    </script>
+
+    <script id="wireframe-fs" type="x-shader/x-fragment">
+    precision mediump float;
+
+    void main(){
+        gl_FragColor = vec4(0.,0.,0.,1.);
+    }
+
     </script>
 
     <script type="text/javascript" src="Common/webgl-utils.js"></script>
