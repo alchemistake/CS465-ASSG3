@@ -54,9 +54,9 @@
 
     void main(){
         vec4 rColor = texture2D(sampler, fTexPosition) * fColor;
-        //rColor.r = min(rColor.r, 1.);
-        //rColor.g = min(rColor.g, 1.);
-        //rColor.b = min(rColor.b, 1.);
+        rColor.r = min(rColor.r, 1.);
+        rColor.g = min(rColor.g, 1.);
+        rColor.b = min(rColor.b, 1.);
         rColor.a = 1.;
         gl_FragColor = rColor;
     }

@@ -39,8 +39,8 @@ function bezier(k, n, u) {
 }
 
 function duBezier(k, n, u) {
-    if (k < 1 && u === 0)
-        return 0.;
+    if ((k < 1 && u === 0) || (u === 1 && n - k < 1))
+        return 1.;
     return Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k - 1)) * (k * (1 - u) - u * (n - k)) * combinations[n.toString()][k];
 }
 
@@ -61,9 +61,11 @@ function duParametric(u, v) {
     let sum = vec3();
 
     for (let i = 0; i <= noControlPoints[0]; i++) {
+        let bez = bezier(i, noControlPoints[0], v);
         for (let j = 0; j <= noControlPoints[1]; j++) {
+            let duBez = duBezier(j, noControlPoints[1], u);
             for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * bezier(i, noControlPoints[0], v) * duBezier(j, noControlPoints[1], u);
+                sum[k] += controlPoints[i][j][k] * bez * duBez;
         }
     }
 
@@ -74,9 +76,12 @@ function dvParametric(u, v) {
     let sum = vec3();
 
     for (let i = 0; i <= noControlPoints[0]; i++) {
+        let duBez = duBezier(i, noControlPoints[0], v);
         for (let j = 0; j <= noControlPoints[1]; j++) {
-            for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * duBezier(i, noControlPoints[0], v) * bezier(j, noControlPoints[1], u);
+            let bez = bezier(j, noControlPoints[1], u);
+            for (let k = 0; k < 3; k++) {
+                sum[k] += controlPoints[i][j][k] * duBez * bez;
+            }
         }
     }
 
@@ -85,8 +90,7 @@ function dvParametric(u, v) {
 
 function normal(u, v) {
     const du = duParametric(u, v), dv = dvParametric(u, v);
-
-    return vec3(du[1] * dv[2] - dv[1] * du[2], du[2] * dv[0] - dv[2] * du[0], du[0] * dv[1] - dv[0] * du[1])
+    return cross(du, dv);
 }
 
 function runGrid() {

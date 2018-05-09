@@ -96,7 +96,7 @@ const cubeIndex = [
 const cubeWireframeIndex = [0, 1, 1, 2, 2, 3, 3, 0, 0, 4, 1, 7, 3, 5, 2, 6, 4, 5, 5, 6, 6, 7, 7, 4];
 let cubeNormal = [];
 for (let i = 0; i < cubeVertexPos.length; i++) {
-    cubeNormal.push(-1 * cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
+    cubeNormal.push(cubeVertexPos[i] / Math.sqrt(3 * 50 * 50));
 }
 
 // Objects
@@ -128,7 +128,8 @@ window.onload = function init() {
 
     wireframeProgram = initShaders(gl, "wireframe-vs", "wireframe-fs");
     gouraudProgram = initShaders(gl, "gouraud-vs", "gouraud-fs");
-    loadWireframeShader();
+    // loadWireframeShader();
+    loadGouraudShader();
 
     generateTexture("kulaksız");
     generateTexture("bg");
