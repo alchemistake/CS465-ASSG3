@@ -48,9 +48,11 @@ function parametric(u, v) {
     let sum = vec3();
 
     for (let i = 0; i <= noControlPoints[0]; i++) {
+        let bezU = bezier(i, noControlPoints[0], v);
         for (let j = 0; j <= noControlPoints[1]; j++) {
+            let bezV = bezier(j, noControlPoints[1], u;
             for (let k = 0; k < 3; k++)
-                sum[k] += controlPoints[i][j][k] * bezier(i, noControlPoints[0], v) * bezier(j, noControlPoints[1], u);
+                sum[k] += controlPoints[i][j][k] * bezU * bezV;
         }
     }
 
