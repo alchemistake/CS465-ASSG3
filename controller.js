@@ -79,17 +79,30 @@ function changeNoControlPoints() {
 
 }
 
-function addRemoveControlPoints(){
+function addRemoveControlPoints() {
     let doc = document.getElementById("control_points");
     doc.innerHTML = "";
-    for(let i = 0; i < noControlPoints[0]; i++){
-        for(let j = 0; j < noControlPoints[1]; j++){
-            for(let k = 0; k < 3; k++) {
+    for (let i = 0; i < noControlPoints[0]; i++) {
+        for (let j = 0; j < noControlPoints[1]; j++) {
+            for (let k = 0; k < 3; k++) {
                 //Reference:https://stackoverflow.com/questions/14853779/adding-input-elements-dynamically-to-form
                 let input = document.createElement("input");
                 input.type = "range";
+                input.min = -10;
+                input.max = 10;
+                input.step = 0.05;
+                input.value = 1;
                 input.addEventListener("oninput", function () {
-                    controlPoints[i][j][k] = parseFloat(input.value);
+                    if (Date.now() - lastUpdate > mspf) {
+                        controlPoints[i][j][k] = parseFloat(input.value);
+                        runGrid();
+                        surface["vPos"] = surfaceVertexPos;
+                        surface["tPos"] = surfaceTextPos;
+                        surface["index"] = currentShader === "wireframe" ? surfaceWireframeIndex : surfaceIndex;
+                        surface["normal"] = surfaceNormal;
+                        initializeObject(surface);
+                        lastUpdate = Date.now();
+                    }
                 });
                 doc.appendChild(input);
 
@@ -108,7 +121,7 @@ function changeNoStep() {
     runGrid();
     surface["vPos"] = surfaceVertexPos;
     surface["tPos"] = surfaceTextPos;
-    surface["index"] = surfaceIndex;
+    surface["index"] = currentShader === "wireframe" ? surfaceWireframeIndex : surfaceIndex;
     surface["normal"] = surfaceNormal;
     initializeObject(surface);
     requestAnimationFrame(render);
