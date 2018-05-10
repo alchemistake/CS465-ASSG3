@@ -50,6 +50,7 @@ function zoom() {
         upPosition = add(cameraPosition, vec4(0., 1., 0., 0.));
 
         requestAnimFrame(render);
+        lastUpdate = Date.now();
     }
 }
 
@@ -119,6 +120,7 @@ function updateAmbient() {
         surface["amb"] = parseFloat(document.getElementById("surfaceAmb").value);
         intensityAmb = parseFloat(document.getElementById("intensityAmb").value);
         requestAnimationFrame(render);
+        lastUpdate = Date.now();
     }
 }
 
@@ -127,6 +129,7 @@ function updateDiffuse() {
         cube["diff"] = parseFloat(document.getElementById("cubeDiffuse").value);
         surface["diff"] = parseFloat(document.getElementById("surfaceDiffuse").value);
         requestAnimationFrame(render);
+        lastUpdate = Date.now();
     }
 }
 
@@ -135,6 +138,7 @@ function updateSpecular() {
         cube["spec"] = parseFloat(document.getElementById("cubeSpecular").value);
         surface["spec"] = parseFloat(document.getElementById("surfaceSpecular").value);
         requestAnimationFrame(render);
+        lastUpdate = Date.now();
     }
 }
 
@@ -142,6 +146,7 @@ function updateIntensity() {
     if (Date.now() - lastUpdate > mspf) {
         intensityLight = parseFloat(document.getElementById("intensity").value);
         requestAnimationFrame(render);
+        lastUpdate = Date.now();
     }
 }
 
