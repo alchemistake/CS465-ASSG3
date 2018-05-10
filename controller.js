@@ -7,6 +7,7 @@ c.height = c.parentElement.clientHeight;
 
 // Camera logic
 let prevX, prevY, lastUpdate = 0;
+let index = ["x", "y", "z"];
 
 // Tracks how much mouse has been moved since last update
 function camera(event) {
@@ -85,6 +86,10 @@ function addRemoveControlPoints() {
     for (let i = 0; i < noControlPoints[0]; i++) {
         for (let j = 0; j < noControlPoints[1]; j++) {
             for (let k = 0; k < 3; k++) {
+                let text = document.createElement("p");
+                text.innerHTML = "Bez(" + i + " , " + j + ") " + index[k] + " = " + 1;
+                doc.appendChild(text);
+
                 //Reference:https://stackoverflow.com/questions/14853779/adding-input-elements-dynamically-to-form
                 let input = document.createElement("input");
                 input.type = "range";
@@ -92,7 +97,7 @@ function addRemoveControlPoints() {
                 input.max = 10;
                 input.step = 0.05;
                 input.value = 1;
-                input.oninput = generateSliderControlFunctions(i, j, k, input);
+                input.oninput = generateSliderControlFunctions(i, j, k, input, text);
                 doc.appendChild(input);
 
                 let br = document.createElement("BR");
@@ -103,10 +108,12 @@ function addRemoveControlPoints() {
 
 }
 
-function generateSliderControlFunctions(i, j, k, input) {
+function generateSliderControlFunctions(i, j, k, input, text) {
     return function () {
         if (Date.now() - lastUpdate > mspf) {
             controlPoints[i][j][k] = parseFloat(input.value);
+
+            text.innerHTML = "Bez(" + i + " , " + j + ") " + index[k] + " = " + input.value;
 
             runGrid();
             surface["vPos"] = surfaceVertexPos;
