@@ -70,7 +70,7 @@ function changeNoControlPoints() {
     runGrid();
     surface["vPos"] = surfaceVertexPos;
     surface["tPos"] = surfaceTextPos;
-    surface["index"] = surfaceIndex;
+    surface["index"] = currentShader === "wireframe" ? surfaceWireframeIndex : surfaceIndex;
     surface["normal"] = surfaceNormal;
     initializeObject(surface);
     requestAnimationFrame(render);
@@ -92,18 +92,7 @@ function addRemoveControlPoints() {
                 input.max = 10;
                 input.step = 0.05;
                 input.value = 1;
-                input.addEventListener("oninput", function () {
-                    if (Date.now() - lastUpdate > mspf) {
-                        controlPoints[i][j][k] = parseFloat(input.value);
-                        runGrid();
-                        surface["vPos"] = surfaceVertexPos;
-                        surface["tPos"] = surfaceTextPos;
-                        surface["index"] = currentShader === "wireframe" ? surfaceWireframeIndex : surfaceIndex;
-                        surface["normal"] = surfaceNormal;
-                        initializeObject(surface);
-                        lastUpdate = Date.now();
-                    }
-                });
+                input.oninput = generateSliderControlFunctions(i, j, k, input);
                 doc.appendChild(input);
 
                 let br = document.createElement("BR");
@@ -112,6 +101,24 @@ function addRemoveControlPoints() {
         }
     }
 
+}
+
+function generateSliderControlFunctions(i, j, k, input) {
+    return function () {
+        if (Date.now() - lastUpdate > mspf) {
+            controlPoints[i][j][k] = parseFloat(input.value);
+
+            runGrid();
+            surface["vPos"] = surfaceVertexPos;
+            surface["tPos"] = surfaceTextPos;
+            surface["index"] = currentShader === "wireframe" ? surfaceWireframeIndex : surfaceIndex;
+            surface["normal"] = surfaceNormal;
+            initializeObject(surface);
+
+            requestAnimationFrame(render);
+            lastUpdate = Date.now();
+        }
+    }
 }
 
 function changeNoStep() {
