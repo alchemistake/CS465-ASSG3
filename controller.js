@@ -73,6 +73,31 @@ function changeNoControlPoints() {
     surface["normal"] = surfaceNormal;
     initializeObject(surface);
     requestAnimationFrame(render);
+
+    addRemoveControlPoints();
+
+}
+
+function addRemoveControlPoints(){
+    let doc = document.getElementById("control_points");
+    doc.innerHTML = "";
+    for(let i = 0; i < noControlPoints[0]; i++){
+        for(let j = 0; j < noControlPoints[1]; j++){
+            for(let k = 0; k < 3; k++) {
+                //Reference:https://stackoverflow.com/questions/14853779/adding-input-elements-dynamically-to-form
+                let input = document.createElement("input");
+                input.type = "range";
+                input.addEventListener("oninput", function () {
+                    controlPoints[i][j][k] = parseFloat(input.value);
+                });
+                doc.appendChild(input);
+
+                let br = document.createElement("BR");
+                doc.appendChild(br);
+            }
+        }
+    }
+
 }
 
 function changeNoStep() {

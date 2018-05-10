@@ -214,15 +214,15 @@
         <input name="intensity" oninput="updateIntensity();" id="intensity" type="range" value="0.5"
                step="0.01"
                min="0" max="3">
-        <br>X
+        <br>Light X
         <input name="positionX" oninput="requestAnimationFrame(render);" id="positionX" type="range" value="0.5"
                step="0.01"
                min="-10" max="10">
-        <br>Y
+        <br>Light Y
         <input name="positionY" oninput="requestAnimationFrame(render);" id="positionY" type="range" value="0.5"
                step="0.01"
                min="-10" max="10">
-        <br>X
+        <br>Light Z
         <input name="positionZ" oninput="requestAnimationFrame(render);" id="positionZ" type="range" value="0.5"
                step="0.01"
                min="-10" max="10">
@@ -265,6 +265,14 @@
         <button onclick="loadGouraudShader();requestAnimationFrame(render);">Gourard</button>
         <button onclick="loadWireframeShader();requestAnimationFrame(render);">Wireframe</button>
         <button onclick="loadPhongShader();requestAnimationFrame(render);">Phong</button>
+
+        <h2>Control Points</h2>
+        <div id="control_points">
+        </div>
+
+        <script>
+
+        </script>
     </div>
 </div>
 </html>

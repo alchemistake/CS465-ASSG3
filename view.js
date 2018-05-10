@@ -137,6 +137,8 @@ window.onload = function init() {
     generateTexture("marble");
     gl.activeTexture(gl.TEXTURE0);
 
+    addRemoveControlPoints();
+
     render();
 };
 
