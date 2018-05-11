@@ -1,3 +1,14 @@
+/*
+* Authors: Mustafa Caner Çalışkaner & Barış Poyraz
+* ID's: ........ , 21401952
+* CS465 Assignment 3 - Realistic Rendering Techniques on Parametric Surfaces
+* Instructor: Uğur Güdükbay
+* bezier.js
+*
+* Description:
+*
+ */
+
 // Size of bezier surface
 let noControlPoints = [4, 4];
 let combinations = {};

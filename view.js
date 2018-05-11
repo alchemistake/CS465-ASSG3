@@ -1,3 +1,14 @@
+/*
+* Authors: Mustafa Caner Çalışkaner & Barış Poyraz
+* ID's: ........ , 21401952
+* CS465 Assignment 3 - Realistic Rendering Techniques on Parametric Surfaces
+* Instructor: Uğur Güdükbay
+* view.js
+*
+* Description:
+*
+ */
+
 // Camera
 let cameraX = 0.0, cameraY = 0.0;
 let cameraDistance = 25.0;
