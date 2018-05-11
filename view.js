@@ -227,9 +227,10 @@ function generateTexture(textureName) {
 * changeTexture(name)
 *
 * Parameters: name
-* name is
+* name is the name of texture
 *
-* Description: WRITE HERE
+* Description: This function takes the name of the texture as a parameter and
+* binds the new texture that is given as the parameter of this function.
 *
 * // Wrapper for gl.bindTexture function to increase ease of use
 *
@@ -402,7 +403,12 @@ function loadPhongShader() {
 /*
 * loadWireframeShader()
 *
-* Description: WRITE HERE
+* Description: This function is called, when the Wireframe option
+* in the Shading Mode menu is clicked. This function loads the wireframeProgram
+* which is constructed in the init() function by using the initShaders function.
+* After that it based on this choice it updates the modelViewMatrix and the
+* projectionMatrix, sets the index attribute of the cube and surface object while
+* initializing them
 *
  */
 function loadWireframeShader() {
@@ -425,7 +431,11 @@ function loadWireframeShader() {
 /*
 * updateMVPMatrices()
 *
-* Description: WRITE HERE
+* Description: This function update the modelViewMatrix and the projectionMatrix by
+* using gl.uniformMatrix4fv function since they are uniform variables. To update them,
+* it first calculates the projectionMatrix by using the perspective function in the
+* MV.js file and calculates the modelViewMatrix by using the lookAt function in the MV.js
+* file
 *
  */
 function updateMVPMatrices() {
