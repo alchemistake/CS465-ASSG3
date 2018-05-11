@@ -5,7 +5,7 @@
 * Instructor: Uğur Güdükbay
 * bezier.js
 *
-* Description:
+* Description: WRITE HERE
 *
  */
 
@@ -18,6 +18,12 @@ let stepSize = 1. / noStep;
 
 let surfaceVertexPos, surfaceTextPos, surfaceIndex, surfaceNormal, surfaceWireframeIndex;
 
+/*
+* generateControlPoints()
+*
+* Description: WRITE HERE
+*
+ */
 function generateControlPoints() {
     controlPoints = [];
     for (let i = 0; i <= noControlPoints[0]; i++) {
@@ -27,6 +33,12 @@ function generateControlPoints() {
     }
 }
 
+/*
+* generateCombinations()
+*
+* Description: WRITE HERE
+*
+ */
 function generateCombinations() {
     for (let no of noControlPoints) {
         let key = no.toString();
@@ -45,16 +57,48 @@ function generateCombinations() {
     }
 }
 
+/*
+* bezier(k, n, u)
+*
+* Parameters: k, n, u
+* k is
+* n is
+* u is
+*
+* Description: WRITE HERE
+*
+ */
 function bezier(k, n, u) {
     return Math.pow(u, k) * Math.pow((1 - u), (n - k)) * combinations[n.toString()][k]
 }
 
+/*
+* duBezier(k, n, u)
+*
+* Parameters: k, n, u
+* k is
+* n is
+* u is
+*
+* Description: WRITE HERE
+*
+ */
 function duBezier(k, n, u) {
     if ((k < 1 && u === 0) || (u === 1 && n - k < 1))
         return 1.;
     return Math.pow(u, (k - 1)) * Math.pow((1 - u), (n - k - 1)) * (k * (1 - u) - u * (n - k)) * combinations[n.toString()][k];
 }
 
+/*
+* parametric(u, v)
+*
+* Parameters: u, v
+* u is
+* v is
+*
+* Description: WRITE HERE
+*
+ */
 function parametric(u, v) {
     let sum = vec3();
 
@@ -70,6 +114,16 @@ function parametric(u, v) {
     return sum;
 }
 
+/*
+* duParametric(u, v)
+*
+* Parameters: u, v
+* u is
+* v is
+*
+* Description: WRITE HERE
+*
+ */
 function duParametric(u, v) {
     let sum = vec3();
 
@@ -85,6 +139,16 @@ function duParametric(u, v) {
     return sum;
 }
 
+/*
+* dvParametric(u, v)
+*
+* Parameters: u, v
+* u is
+* v is
+*
+* Description: WRITE HERE
+*
+ */
 function dvParametric(u, v) {
     let sum = vec3();
 
@@ -101,11 +165,27 @@ function dvParametric(u, v) {
     return sum;
 }
 
+/*
+* normal(u, v)
+*
+* Parameters: u, v
+* u is
+* v is
+*
+* Description: WRITE HERE
+*
+ */
 function normal(u, v) {
     const du = duParametric(u, v), dv = dvParametric(u, v);
     return cross(du, dv);
 }
 
+/*
+* runGrid()
+*
+* Description: WRITE HERE
+*
+ */
 function runGrid() {
     surfaceVertexPos = [];
     surfaceTextPos = [];

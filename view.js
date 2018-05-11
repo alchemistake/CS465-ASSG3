@@ -7,7 +7,7 @@
 *
 * Description: The view javascript file contains essential functions and variables to
 * update camera, modelViewMatrix, projectionMatrix, and texture. This file also contains
-* the model we use in our project for our design choices which are the cube and surface objects.
+* the model we use in our project for our design choices which are the cube and surface objects
 *
  */
 
