@@ -6,7 +6,8 @@
 * view.js
 *
 * Description: The view javascript file contains essential functions and variables to
-*
+* update camera, modelViewMatrix, projectionMatrix, and texture. This file also contains
+* the model we use in our project for our design choices which are the cube and surface objects.
 *
  */
 
@@ -175,10 +176,11 @@ window.onload = function init() {
 /*
 * render()
 *
-* Description: WRITE HERE
+* Description: The render function updates the camera and the modelViewMatrix based on
+* the events and on the functions that changes those variables. If the shading mode in the
+* options menu is not wireframe then it sends the camera and light positions. It always sends the modelViewMatrix.
+* Finally, if the shading mode is changed, it updates the texture and renders the cube and surface objects
 *
-*
-* // Applies the updates in joint variables as transformations and renders the new position
  */
 function render() {
     let currentCamera = mult(mult(mat4(cameraPosition, upPosition), rotate(cameraX, 0, 1, 0)), rotate(cameraY, 0, 0, 1));
@@ -207,13 +209,12 @@ function render() {
 * generateTexture(textureName)
 *
 * Parameters: textureName
-* textureName is
+* textureName is the name of the texture
 *
-* Description: WRITE HERE
+* Description: This function creates a texture object
+* by taking the name of the texture as it's input and
+* binds this texture to a texture map.
 *
-*
-*
-* // Creates texture object
  */
 function generateTexture(textureName) {
     textures[textureName] = gl.createTexture();
@@ -232,7 +233,6 @@ function generateTexture(textureName) {
 * Description: This function takes the name of the texture as a parameter and
 * binds the new texture that is given as the parameter of this function.
 *
-* // Wrapper for gl.bindTexture function to increase ease of use
 *
  */
 function changeTexture(name) {
@@ -247,15 +247,18 @@ function changeTexture(name) {
 * generateObject(vPos, tPos, index, normal, amb, diff, spec)
 *
 * Parameters:
-* vPos is
-* tPos is
-* index is
-* normal is
-* amb is
-* diff is
-* spec is
+* vPos is vertexPosition
+* tPos is texturePosition
+* index is the vertex index table
+* normal is the normal vector
+* amb is the ambient light
+* diff is diffuse light
+* spec is specular light
 *
-* Description: WRITE HERE
+* Description: This function generates object. From this function, we generate
+* our cube and surface objects, by giving the necessary parameters given above.
+* Finally, this function returns our newly constructed object, which is either cube
+* or surface
 *
 *
 * // Object system
@@ -280,9 +283,11 @@ function generateObject(vPos, tPos, index, normal, amb, diff, spec) {
 * initializeObject(obj)
 *
 * Parameters: obj
-* obj is
+* obj is cube or surface
 *
-* Description: WRITE HERE
+* Description: This function takes a cube object or a surface object
+* as it's parameter and binds it's vertex, texture, normal and index buffers
+* with respective data that is gathered from the property of the object.
 *
  */
 function initializeObject(obj) {
@@ -311,9 +316,13 @@ function initializeObject(obj) {
 * renderObject(obj)
 *
 * Parameters: obj
-* obj is
+* obj is cube or surface.
 *
-* Description: WRITE HERE
+* Description: This function takes a cube object or a surface object as it's input.
+* Since cube object and surface object have the same properties, in order to update
+* one of them this parameter is used. Overall, this function renders the current object, updates
+* the light, texture buffer, normal buffer and calls either gl.LINES or gl.TRIANGLES to draw the
+* elements in the index buffer
 *
  */
 function renderObject(obj) {
@@ -345,7 +354,13 @@ function renderObject(obj) {
 /*
 * loadGouraudShader()
 *
-* Description: WRITE HERE
+* Description: This function is the initial shading mode when the window is
+* loaded. This function is also called when the Gouraud option in the
+* Shading Mode menu is clicked. This function loads the gouraudProgram which
+* is constructed in the init function by using the initShaders function.
+* After that, based on this choice, it updates the modelViewMatrix and the
+* projectionMatrix, and sets the index attribute of the cube and surface object
+* while initializing them
 *
  */
 function loadGouraudShader() {
@@ -374,7 +389,12 @@ function loadGouraudShader() {
 /*
 * loadPhongShader()
 *
-* Description: WRITE HERE
+* Description: This function is called when the Phong option in the
+* Shading Mode menu is clicked. This function loads the phongProgram which
+* is constructed in the init function by using the initShaders function.
+* After that, based on this choice, it updates the modelViewMatrix and the
+* projectionMatrix, and sets the index attribute of the cube and surface object
+* while initializing them
 *
  */
 function loadPhongShader() {
@@ -403,11 +423,11 @@ function loadPhongShader() {
 /*
 * loadWireframeShader()
 *
-* Description: This function is called, when the Wireframe option
+* Description: This function is called when the Wireframe option
 * in the Shading Mode menu is clicked. This function loads the wireframeProgram
-* which is constructed in the init() function by using the initShaders function.
-* After that it based on this choice it updates the modelViewMatrix and the
-* projectionMatrix, sets the index attribute of the cube and surface object while
+* which is constructed in the init function by using the initShaders function.
+* After that, based on this choice, it updates the modelViewMatrix and the
+* projectionMatrix, and sets the index attribute of the cube and surface object while
 * initializing them
 *
  */
