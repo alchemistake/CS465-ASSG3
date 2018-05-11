@@ -5,9 +5,13 @@
 * Instructor: Uğur Güdükbay
 * view.js
 *
-* Description:
+* Description: The view javascript file contains essential functions and variables to
+*
 *
  */
+
+
+/*----Global Variables----*/
 
 // Camera
 let cameraX = 0.0, cameraY = 0.0;
@@ -115,6 +119,20 @@ let cube, surface;
 
 let currentShader = "wireframe";
 
+/*
+* init()
+*
+* Description: This function is called when the window is loaded. First, it creates the
+* gl canvas element, sets its properties. Then it generates and initializes the initial
+* cube object. After that it generates the initial number of control points which is 4 by 4,
+* creates the look ahead table, calls the runGrid function to create and map the surface vertex
+* with the texture vertex. Then based on the values that are set in the runGrid function,
+* it creates the surface object and by calling the initializeObject function, it binds and updates
+* the buffers. After that, it initializes shaders, generates the already given textures, sets the
+* initial texture. At the end it adds the control the points by checking on the values in the options.
+* Finally, it calls render function to display the current state of the display.
+*
+ */
 window.onload = function init() {
     canvas = document.getElementById("gl-canvas");
 
@@ -153,7 +171,15 @@ window.onload = function init() {
     render();
 };
 
-// Applies the updates in joint variables as transformations and renders the new position
+
+/*
+* render()
+*
+* Description: WRITE HERE
+*
+*
+* // Applies the updates in joint variables as transformations and renders the new position
+ */
 function render() {
     let currentCamera = mult(mult(mat4(cameraPosition, upPosition), rotate(cameraX, 0, 1, 0)), rotate(cameraY, 0, 0, 1));
 
@@ -176,7 +202,19 @@ function render() {
     renderObject(surface);
 }
 
-// Creates texture object
+
+/*
+* generateTexture(textureName)
+*
+* Parameters: textureName
+* textureName is
+*
+* Description: WRITE HERE
+*
+*
+*
+* // Creates texture object
+ */
 function generateTexture(textureName) {
     textures[textureName] = gl.createTexture();
 
@@ -184,7 +222,18 @@ function generateTexture(textureName) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, document.getElementById(textureName));
 }
 
-// Wrapper for gl.bindTexture function to increase ease of use
+
+/*
+* changeTexture(name)
+*
+* Parameters: name
+* name is
+*
+* Description: WRITE HERE
+*
+* // Wrapper for gl.bindTexture function to increase ease of use
+*
+ */
 function changeTexture(name) {
     gl.bindTexture(gl.TEXTURE_2D, textures[name]);
     gl.generateMipmap(gl.TEXTURE_2D);
@@ -192,7 +241,24 @@ function changeTexture(name) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
 }
 
-// Object system
+
+/*
+* generateObject(vPos, tPos, index, normal, amb, diff, spec)
+*
+* Parameters:
+* vPos is
+* tPos is
+* index is
+* normal is
+* amb is
+* diff is
+* spec is
+*
+* Description: WRITE HERE
+*
+*
+* // Object system
+ */
 function generateObject(vPos, tPos, index, normal, amb, diff, spec) {
     return {
         "vPos": vPos,
@@ -209,6 +275,15 @@ function generateObject(vPos, tPos, index, normal, amb, diff, spec) {
     }
 }
 
+/*
+* initializeObject(obj)
+*
+* Parameters: obj
+* obj is
+*
+* Description: WRITE HERE
+*
+ */
 function initializeObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(obj["vPos"]), gl.STATIC_DRAW);
@@ -231,6 +306,15 @@ function initializeObject(obj) {
     obj["iBuf"].numItems = obj["index"].length / obj["iBuf"].itemSize;
 }
 
+/*
+* renderObject(obj)
+*
+* Parameters: obj
+* obj is
+*
+* Description: WRITE HERE
+*
+ */
 function renderObject(obj) {
     gl.bindBuffer(gl.ARRAY_BUFFER, obj["vBuf"]);
     gl.vertexAttribPointer(curProgram.vertexPositionAttribute, obj["vBuf"].itemSize, gl.FLOAT, false, 0, 0);
@@ -257,6 +341,12 @@ function renderObject(obj) {
         gl.drawElements(gl.TRIANGLES, obj["iBuf"].numItems, gl.UNSIGNED_SHORT, 0);
 }
 
+/*
+* loadGouraudShader()
+*
+* Description: WRITE HERE
+*
+ */
 function loadGouraudShader() {
     curProgram = gouraudProgram;
     currentShader = "gouraud";
@@ -280,6 +370,12 @@ function loadGouraudShader() {
     initializeObject(surface);
 }
 
+/*
+* loadPhongShader()
+*
+* Description: WRITE HERE
+*
+ */
 function loadPhongShader() {
     curProgram = phongProgram;
     currentShader = "phong";
@@ -303,6 +399,12 @@ function loadPhongShader() {
     initializeObject(surface);
 }
 
+/*
+* loadWireframeShader()
+*
+* Description: WRITE HERE
+*
+ */
 function loadWireframeShader() {
     curProgram = wireframeProgram;
     currentShader = "wireframe";
@@ -320,6 +422,12 @@ function loadWireframeShader() {
     initializeObject(surface);
 }
 
+/*
+* updateMVPMatrices()
+*
+* Description: WRITE HERE
+*
+ */
 function updateMVPMatrices() {
     // Projection is changed to perspective for more realistic look
     projectionMatrix = perspective(75., (1. * canvas.clientWidth) / canvas.clientHeight, 0.01, 150);
